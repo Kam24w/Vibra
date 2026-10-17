@@ -99,6 +99,8 @@ class MainActivity : ComponentActivity() {
                     ) + 360
                     ) % 360
 
+            currentAzimuth = azimuth.toFloat()
+
             println("VIBRA ORIENTACION: ${azimuth.toInt()}°")
         }
 
@@ -109,6 +111,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private var currentLocation by mutableStateOf<Location?>(null)
+    private var currentAzimuth by mutableStateOf<Float?>(null)
     private val locationListener = object : LocationListener {
         override fun onLocationChanged(location: Location) {
             currentLocation = location
@@ -184,20 +187,21 @@ class MainActivity : ComponentActivity() {
             WearApp(
                 greetingName = "Vibra",
                 vibrator = vibrator,
-                currentLocation = currentLocation
+                currentLocation = currentLocation,
+                currentAzimuth = currentAzimuth
             )
         }
     }
 }
 @Composable
-fun WearApp( greetingName: String, vibrator: android.os.Vibrator?, currentLocation: Location?) {
+fun WearApp( greetingName: String, vibrator: android.os.Vibrator?, currentLocation: Location?, currentAzimuth: Float?) {
     val navigationEngine = remember { NavigationEngine() }
 
     var direction by remember {
         mutableStateOf(Direction.STRAIGHT)
     }
 
-    LaunchedEffect(currentLocation) {
+    LaunchedEffect(currentLocation, currentAzimuth) {
         currentLocation?.let { location ->
 
             val targetLatitude = 37.4225
@@ -210,13 +214,15 @@ fun WearApp( greetingName: String, vibrator: android.os.Vibrator?, currentLocati
                 targetLongitude = targetLongitude
             )
 
-            direction = navigationEngine.calculateDirection(
-                currentBearing = location.bearing.toDouble(),
-                targetBearing = targetBearing
-            )
+            currentAzimuth?.let { azimuth ->
+                direction = navigationEngine.calculateDirection(
+                    currentBearing = azimuth.toDouble(),
+                    targetBearing = targetBearing
+                )
+            }
 
             println(
-                "VIBRA NAV: current=${location.bearing}, target=$targetBearing, direction=$direction"
+                "VIBRA NAV: current=$currentAzimuth, target=$targetBearing, direction=$direction"
             )
         }
     }
@@ -251,6 +257,7 @@ fun DefaultPreview() {
     WearApp(
         greetingName = "Preview Android",
         vibrator = null,
-        currentLocation = null
+        currentLocation = null,
+        currentAzimuth = null
     )
 }
