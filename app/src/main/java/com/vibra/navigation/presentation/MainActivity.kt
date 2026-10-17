@@ -33,6 +33,12 @@ import android.location.LocationManager
 import androidx.core.app.ActivityCompat
 import android.location.Location
 import android.location.LocationListener
+import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import kotlin.math.roundToInt
 fun vibrateForDirection(
     vibrator: android.os.Vibrator,
     direction: Direction
@@ -69,16 +75,79 @@ fun vibrateForDirection(
 class MainActivity : ComponentActivity() {
 
     private lateinit var locationManager: LocationManager
+    private lateinit var sensorManager: SensorManager
+    private var rotationSensor: Sensor? = null
+    private val rotationMatrix = FloatArray(9)
+    private val orientationAngles = FloatArray(3)
+
+    private val rotationListener = object : SensorEventListener {
+
+        override fun onSensorChanged(event: SensorEvent) {
+            SensorManager.getRotationMatrixFromVector(
+                rotationMatrix,
+                event.values
+            )
+
+            SensorManager.getOrientation(
+                rotationMatrix,
+                orientationAngles
+            )
+
+            val azimuth = (
+                    Math.toDegrees(
+                        orientationAngles[0].toDouble()
+                    ) + 360
+                    ) % 360
+
+            println("VIBRA ORIENTACION: ${azimuth.toInt()}°")
+        }
+
+        override fun onAccuracyChanged(
+            sensor: Sensor?,
+            accuracy: Int
+        ) {}
+    }
+
+    private var currentLocation by mutableStateOf<Location?>(null)
     private val locationListener = object : LocationListener {
         override fun onLocationChanged(location: Location) {
+            currentLocation = location
+
             println(
-                "VIBRA GPS: ${location.latitude}, ${location.longitude}"
+                "VIBRA GPS: ${location.latitude}, ${location.longitude}, bearing=${location.bearing}"
             )
         }
     }
+    override fun onResume() {
+        super.onResume()
 
+        rotationSensor?.let { sensor ->
+            sensorManager.registerListener(
+                rotationListener,
+                sensor,
+                SensorManager.SENSOR_DELAY_UI
+            )
+        }
+    }
+    override fun onPause() {
+        super.onPause()
+        sensorManager.unregisterListener(rotationListener)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        sensorManager = getSystemService(
+            Context.SENSOR_SERVICE
+        ) as SensorManager
+
+        rotationSensor = sensorManager.getDefaultSensor(
+            Sensor.TYPE_ROTATION_VECTOR
+        )
+
+        println(
+            "VIBRA SENSOR: ${
+                if (rotationSensor != null) "Disponible" else "No disponible"
+            }"
+        )
 
         locationManager =
             getSystemService(LOCATION_SERVICE) as LocationManager
@@ -112,35 +181,44 @@ class MainActivity : ComponentActivity() {
         )
 
         setContent {
-            WearApp("Vibra", vibrator)
+            WearApp(
+                greetingName = "Vibra",
+                vibrator = vibrator,
+                currentLocation = currentLocation
+            )
         }
-    }
-
-    private fun getCurrentLocation(): Location? {
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            return null
-        }
-
-        return locationManager.getLastKnownLocation(
-            LocationManager.GPS_PROVIDER
-        )
     }
 }
 @Composable
-fun WearApp(greetingName: String, vibrator: android.os.Vibrator?) {
+fun WearApp( greetingName: String, vibrator: android.os.Vibrator?, currentLocation: Location?) {
     val navigationEngine = remember { NavigationEngine() }
 
     var direction by remember {
-        mutableStateOf(
-            navigationEngine.calculateDirection(
-                currentBearing = 0.0,
-                targetBearing = 90.0
+        mutableStateOf(Direction.STRAIGHT)
+    }
+
+    LaunchedEffect(currentLocation) {
+        currentLocation?.let { location ->
+
+            val targetLatitude = 37.4225
+            val targetLongitude = -122.0835
+
+            val targetBearing = navigationEngine.calculateBearing(
+                currentLatitude = location.latitude,
+                currentLongitude = location.longitude,
+                targetLatitude = targetLatitude,
+                targetLongitude = targetLongitude
             )
-        )
+
+            direction = navigationEngine.calculateDirection(
+                currentBearing = location.bearing.toDouble(),
+                targetBearing = targetBearing
+            )
+
+            println(
+                "VIBRA NAV: current=${location.bearing}, target=$targetBearing, direction=$direction"
+            )
+        }
     }
     LaunchedEffect(direction) {
         vibrator?.let {
@@ -170,5 +248,9 @@ fun WearApp(greetingName: String, vibrator: android.os.Vibrator?) {
 @WearPreviewFontScales
 @Composable
 fun DefaultPreview() {
-    WearApp("Preview Android", null)
+    WearApp(
+        greetingName = "Preview Android",
+        vibrator = null,
+        currentLocation = null
+    )
 }
