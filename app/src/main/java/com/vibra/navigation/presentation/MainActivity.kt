@@ -70,6 +70,14 @@ fun vibrateForDirection(
                 )
             )
         }
+        Direction.BACK -> {
+            vibrator.vibrate(
+                VibrationEffect.createWaveform(
+                    longArrayOf(0, 500, 150, 500, 150, 500),
+                    -1
+                )
+            )
+        }
     }
 }
 class MainActivity : ComponentActivity() {
@@ -242,6 +250,7 @@ fun WearApp( greetingName: String, vibrator: android.os.Vibrator?, currentLocati
                         Direction.LEFT -> "←"
                         Direction.RIGHT -> "→"
                         Direction.STRAIGHT -> "↑"
+                        Direction.BACK -> "↓"
                     },
                     fontSize = 140.sp
                 )
