@@ -49,6 +49,7 @@ class NavigationEngine {
         }
 
         return when {
+            kotlin.math.abs(difference) >= 150 -> Direction.BACK
             difference > 30 -> Direction.RIGHT
             difference < -30 -> Direction.LEFT
             else -> Direction.STRAIGHT
