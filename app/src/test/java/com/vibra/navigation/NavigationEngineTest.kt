@@ -52,5 +52,34 @@ class NavigationEngineTest {
 
         assertEquals(Direction.BACK, result)
     }
+
+    @Test
+    fun `crossing north with small angle difference returns straight`() {
+        val result = navigationEngine.calculateDirection(
+            currentBearing = 350.0,
+            targetBearing = 10.0
+        )
+
+        assertEquals(Direction.STRAIGHT, result)
+    }
+
+    @Test
+    fun `angle difference of 30 degrees returns straight`() {
+        val result = navigationEngine.calculateDirection(
+            currentBearing = 0.0,
+            targetBearing = 30.0
+        )
+
+        assertEquals(Direction.STRAIGHT, result)
+    }
+    @Test
+    fun `angle difference of 150 degrees returns back`() {
+        val result = navigationEngine.calculateDirection(
+            currentBearing = 0.0,
+            targetBearing = 150.0
+        )
+
+        assertEquals(Direction.BACK, result)
+    }
 }
 
