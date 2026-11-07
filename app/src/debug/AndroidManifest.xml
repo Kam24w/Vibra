@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Solo builds debug: el puente de desarrollo del emulador (LocalDevBridgeClient)
+    abre un socket a 10.0.2.2. Las builds release no declaran estos permisos.
+
+    ACCESS_LOCAL_NETWORK: desde Android 17 (targetSdk 37) el tráfico a la subred
+    local (10.0.2.0/24 en el emulador, que incluye el host 10.0.2.2) se descarta en
+    el kernel sin este permiso de runtime: el connect() acaba en timeout.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
+</manifest>
