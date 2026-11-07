@@ -15,6 +15,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -78,7 +79,8 @@ fun GuidanceScreen(
     onRepeat: () -> Unit,
     onTogglePause: () -> Unit,
 ) {
-    val listState = rememberScalingLazyListState()
+    // La tarjeta de maniobra (ítem 0) es lo primero que debe verse al levantar la muñeca.
+    val listState = rememberScalingLazyListState(initialCenterItemIndex = 0)
     VibraBackground {
         ScreenScaffold(scrollState = listState) { contentPadding ->
             ScalingLazyColumn(
@@ -169,7 +171,10 @@ private fun ManeuverCard(maneuver: ManeuverUi?, isPaused: Boolean) {
                 eventId = maneuver?.id ?: 0L,
                 color = if (maneuver == null || isPaused) VibraColors.CreamMuted else VibraColors.Cream,
                 size = 96.dp,
-                modifier = Modifier.align(Alignment.Center),
+                // Desplazada para que la punta no choque con la distancia de la esquina.
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .offset(x = (-14).dp, y = 6.dp),
             )
             // Distancia en la esquina, como el "3m" del mockup.
             AnimatedContent(
