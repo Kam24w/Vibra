@@ -9,7 +9,6 @@ import com.google.android.gms.wearable.MessageEvent
 import com.google.android.gms.wearable.WearableListenerService
 import com.vibra.navigation.VibraApplication
 import com.vibra.navigation.data.model.ActiveRoute
-import com.vibra.navigation.data.model.ConnectionStatus
 import com.vibra.navigation.data.parser.ParseResult
 import com.vibra.navigation.data.repository.EventDisposition
 import com.vibra.navigation.data.repository.toActiveRoute
@@ -21,8 +20,7 @@ import com.vibra.navigation.data.wear.DataLayerContract
  * Batería: el sistema solo enlaza (y despierta) este servicio cuando llega un
  * evento que coincide con los `<intent-filter>` del manifest (filtrados por
  * path), y lo destruye al terminar. No hay polling, wakelocks propios ni
- * servicio en primer plano. Todo el trabajo es síncrono y corto (<10 ms): parsear
- * ~200 B de JSON y entregar la onda al Vibrator, que se ejecuta en el proceso del sistema.
+ * servicio en primer plano. Todo el trabajo es síncrono y corto.
  */
 class VibraListenerService : WearableListenerService() {
 
@@ -35,8 +33,14 @@ class VibraListenerService : WearableListenerService() {
             is ParseResult.Failure -> Log.w(TAG, "Evento descartado: ${result.reason}", result.cause)
             is ParseResult.Success -> {
                 val event = result.event
-                when (container.navigationRepository.onNavigationEvent(event)) {
-                    EventDisposition.NEW -> container.vibrationManager.vibrate(event)
+                val repository = container.navigationRepository
+                when (repository.onNavigationEvent(event)) {
+                    EventDisposition.NEW ->
+                        if (repository.guidancePaused.value) {
+                            Log.i(TAG, "Guía en pausa: ${event.action} sin vibración")
+                        } else {
+                            container.vibrationManager.vibrate(event)
+                        }
                     EventDisposition.STALE -> Log.i(TAG, "Evento atrasado, se muestra sin vibrar: ${event.action}")
                     EventDisposition.DUPLICATE -> Log.d(TAG, "Evento duplicado ignorado: ${event.timestamp}")
                 }
@@ -65,10 +69,7 @@ class VibraListenerService : WearableListenerService() {
     }
 
     override fun onCapabilityChanged(capabilityInfo: CapabilityInfo) {
-        val node = capabilityInfo.nodes.firstOrNull { it.isNearby } ?: capabilityInfo.nodes.firstOrNull()
-        container.navigationRepository.onConnectionChanged(
-            node?.let { ConnectionStatus.Connected(it.displayName) } ?: ConnectionStatus.Disconnected,
-        )
+        container.navigationRepository.requestConnectionRefresh()
     }
 
     private companion object {
