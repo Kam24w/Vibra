@@ -7,7 +7,11 @@ import com.vibra.navigation.data.parser.NavigationEventParser
 import com.vibra.navigation.data.repository.NavigationRepository
 import com.vibra.navigation.data.repository.WearNavigationRepository
 import com.vibra.navigation.data.settings.HapticSettingsRepository
+import com.vibra.navigation.data.wear.DataLayerContract
+import com.vibra.navigation.data.wear.DevEnvironment
+import com.vibra.navigation.data.wear.LocalDevBridgeClient
 import com.vibra.navigation.haptics.VibrationManager
+import com.vibra.navigation.service.IncomingEventHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -32,7 +36,30 @@ class AppContainer(context: Context) {
             capabilityClient = Wearable.getCapabilityClient(appContext),
             parser = parser,
             scope = applicationScope,
+            devBridge = devBridge,
         )
+    }
+
+    /** Lógica común a la Data Layer y al puente de desarrollo. */
+    val incomingEventHandler: IncomingEventHandler by lazy {
+        IncomingEventHandler(parser, { navigationRepository }, { vibrationManager })
+    }
+
+    /**
+     * Solo emulador + debug: puente por túnel ADB para cuando Play services no empareja
+     * ("Got 0 accounts"). En un reloj físico es null y solo se usa la Data Layer.
+     */
+    private val devBridge: LocalDevBridgeClient? by lazy {
+        if (!DevEnvironment.localBridgeEnabled) return@lazy null
+        LocalDevBridgeClient().also { bridge ->
+            bridge.start(applicationScope) { path, data ->
+                when (path) {
+                    DataLayerContract.PATH_NAVIGATION_EVENT -> incomingEventHandler.onNavigationEventPayload(data)
+                    DataLayerContract.PATH_ACTIVE_ROUTE ->
+                        LocalDevBridgeClient.decodeActiveRoute(data)?.let(incomingEventHandler::onActiveRoute)
+                }
+            }
+        }
     }
 
     val hapticSettings: HapticSettingsRepository by lazy { HapticSettingsRepository(appContext) }
