@@ -1,8 +1,12 @@
 package com.vibra.navigation.presentation.app
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.font.FontWeight
+import androidx.wear.compose.foundation.CurvedTextStyle
 import androidx.wear.compose.material3.AppScaffold
 import androidx.wear.compose.material3.TimeText
+import androidx.wear.compose.material3.timeTextCurvedText
+import com.vibra.navigation.presentation.theme.VibraColors
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
@@ -27,7 +31,17 @@ object VibraDestinations {
 fun VibraApp() {
     VibraTheme {
         val navController = rememberSwipeDismissableNavController()
-        AppScaffold(timeText = { TimeText() }) {
+        AppScaffold(
+            timeText = {
+                // Hora en marino sobre una banda crema translúcida: legible sobre el degradado.
+                TimeText(backgroundColor = VibraColors.CreamLight.copy(alpha = 0.85f)) { time ->
+                    timeTextCurvedText(
+                        time,
+                        CurvedTextStyle(color = VibraColors.Navy, fontWeight = FontWeight.Bold),
+                    )
+                }
+            },
+        ) {
             SwipeDismissableNavHost(
                 navController = navController,
                 startDestination = VibraDestinations.SPLASH,
