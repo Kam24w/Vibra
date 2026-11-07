@@ -2,16 +2,32 @@ package com.vibra.navigation.haptics
 
 import com.vibra.navigation.data.model.NavigationAction
 import com.vibra.navigation.data.model.VibrationPattern
+import kotlin.math.roundToInt
 
 /**
  * Representación pura (sin Android) de una forma de onda, para poder testearla en JVM.
- * `timings[i]` dura `amplitudes[i]`; los índices pares son pausas (amplitud 0).
+ * `timings[i]` dura `amplitudes[i]`; amplitud 0 = pausa.
  */
 data class HapticWaveform(
     val timings: LongArray,
     val amplitudes: IntArray,
 ) {
+    init {
+        require(timings.size == amplitudes.size) { "timings y amplitudes deben tener el mismo tamaño" }
+    }
+
     val totalDurationMs: Long get() = timings.sum()
+
+    /** Aplica la intensidad del usuario (0..1) sin apagar ningún pulso. */
+    fun scaled(factor: Float): HapticWaveform {
+        val f = factor.coerceIn(0f, 1f)
+        return copy(
+            amplitudes = IntArray(amplitudes.size) { i ->
+                val a = amplitudes[i]
+                if (a == 0) 0 else (a * f).roundToInt().coerceIn(1, 255)
+            },
+        )
+    }
 
     override fun equals(other: Any?): Boolean =
         other is HapticWaveform && timings.contentEquals(other.timings) && amplitudes.contentEquals(other.amplitudes)
@@ -59,5 +75,38 @@ data class HapticWaveform(
                 NavigationAction.UNKNOWN -> VibrationPattern(pulses = 1, durationMs = 200, amplitude = 200)
             },
         )
+
+        /** Onda: la amplitud sube y baja de forma progresiva. */
+        fun wave(steps: Int = 8, stepMs: Long = 60L): HapticWaveform {
+            val up = (1..steps).map { (255f * it / steps).roundToInt() }
+            val levels = up + up.reversed().drop(1)
+            return HapticWaveform(
+                timings = LongArray(levels.size) { stepMs },
+                amplitudes = levels.toIntArray(),
+            )
+        }
+
+        /** Ritmo: tres toques cortos y uno largo. */
+        fun rhythm(): HapticWaveform = HapticWaveform(
+            timings = longArrayOf(0, 70, 90, 70, 90, 70, 160, 400),
+            amplitudes = intArrayOf(0, 255, 0, 255, 0, 255, 0, 255),
+        )
+
+        /** Pulso único para la prueba rápida de VibrationEffect. */
+        fun pulse(durationMs: Long = 300L): HapticWaveform =
+            HapticWaveform(longArrayOf(0, durationMs), intArrayOf(0, 255))
+    }
+}
+
+/** Patrones que se pueden sentir desde la pantalla de test háptico. */
+enum class HapticPreset {
+    LEFT, RIGHT, PULSE, WAVE, RHYTHM;
+
+    fun waveform(): HapticWaveform = when (this) {
+        LEFT -> HapticWaveform.defaultFor(NavigationAction.TURN_LEFT)
+        RIGHT -> HapticWaveform.defaultFor(NavigationAction.TURN_RIGHT)
+        PULSE -> HapticWaveform.pulse()
+        WAVE -> HapticWaveform.wave()
+        RHYTHM -> HapticWaveform.rhythm()
     }
 }

@@ -4,6 +4,7 @@ import com.vibra.navigation.data.model.NavigationAction
 import com.vibra.navigation.data.model.VibrationPattern
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -39,6 +40,35 @@ class HapticWaveformTest {
         val left = HapticWaveform.defaultFor(NavigationAction.TURN_LEFT)
         val right = HapticWaveform.defaultFor(NavigationAction.TURN_RIGHT)
 
-        assertTrue(left.amplitudes.count { it > 0 } != right.amplitudes.count { it > 0 })
+        assertNotEquals(left.amplitudes.count { it > 0 }, right.amplitudes.count { it > 0 })
+    }
+
+    @Test
+    fun `scaling keeps pauses silent and pulses audible`() {
+        val wave = HapticWaveform.from(VibrationPattern(pulses = 2, durationMs = 100, amplitude = 200))
+
+        val half = wave.scaled(0.5f)
+        assertArrayEquals(intArrayOf(0, 100, 0, 100), half.amplitudes)
+        assertArrayEquals(wave.timings, half.timings)
+
+        val tiny = wave.scaled(0.001f)
+        assertArrayEquals(intArrayOf(0, 1, 0, 1), tiny.amplitudes)
+    }
+
+    @Test
+    fun `wave ramps up to full amplitude and back down`() {
+        val wave = HapticWaveform.wave(steps = 4, stepMs = 50)
+
+        assertArrayEquals(intArrayOf(64, 128, 191, 255, 191, 128, 64), wave.amplitudes)
+        assertEquals(350L, wave.totalDurationMs)
+    }
+
+    @Test
+    fun `every preset produces a non empty waveform`() {
+        HapticPreset.entries.forEach { preset ->
+            val wave = preset.waveform()
+            assertTrue("$preset vacío", wave.amplitudes.any { it > 0 })
+            assertTrue("$preset demasiado largo", wave.totalDurationMs in 1..2_000)
+        }
     }
 }
