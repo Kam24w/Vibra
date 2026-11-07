@@ -1,7 +1,26 @@
 <resources>
     <string name="app_name">Vibra</string>
-    <string name="hello_world">Hello, %1$s!</string>
+
+    <string name="status_connected">Conectado a %1$s</string>
+    <string name="status_disconnected">Teléfono desconectado</string>
+    <string name="status_searching">Emparejando…</string>
+    <string name="status_unavailable">Data Layer no disponible</string>
+
+    <string name="waiting_title">Sin ruta activa</string>
+    <string name="waiting_body">Inicia una ruta en WanderAI desde el teléfono</string>
+    <string name="waiting_instruction">Esperando indicación…</string>
+
+    <string name="destination_format">Destino: %1$s</string>
+    <string name="remaining_label">Restante: %1$s</string>
+    <string name="distance_meters">%1$d m</string>
+    <string name="distance_km">%1$.1f km</string>
+
+    <string name="action_repeat">Repetir</string>
+    <string name="action_stop">Detener ruta</string>
+    <string name="action_retry">Reintentar</string>
+
     <string name="error_send_failed">No se pudo enviar al teléfono</string>
+
     <string name="cd_maneuver">Maniobra: %1$s</string>
     <string name="maneuver_turn_left">girar a la izquierda</string>
     <string name="maneuver_turn_right">girar a la derecha</string>
