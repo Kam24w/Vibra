@@ -19,6 +19,7 @@ import com.vibra.navigation.data.model.UserAction
 import com.vibra.navigation.data.model.UserActionType
 import com.vibra.navigation.data.parser.NavigationEventParser
 import com.vibra.navigation.data.wear.DataLayerContract
+import com.vibra.navigation.data.wear.LocalDevBridgeClient
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.NonCancellable
@@ -50,6 +51,10 @@ import kotlinx.coroutines.withTimeout
  *  - **Envíos con reintentos** y backoff exponencial, resolviendo el nodo en cada intento.
  *
  * Es un singleton de proceso (ver [com.vibra.navigation.di.AppContainer]).
+ *
+ * [devBridge] solo existe en emuladores (debug): si Play services no devuelve nodos o
+ * falla ("Got 0 accounts", consentimiento global…), se usa el puente por túnel ADB.
+ * En un reloj físico es null y el comportamiento es exactamente el de la Data Layer.
  */
 class WearNavigationRepository(
     private val dataClient: DataClient,
@@ -59,6 +64,7 @@ class WearNavigationRepository(
     private val parser: NavigationEventParser,
     private val scope: CoroutineScope,
     private val clock: () -> Long = System::currentTimeMillis,
+    private val devBridge: LocalDevBridgeClient? = null,
 ) : NavigationRepository {
 
     private val _activeRoute = MutableStateFlow(ActiveRoute.Inactive)
@@ -89,6 +95,9 @@ class WearNavigationRepository(
     }
 
     init {
+        devBridge?.let { bridge ->
+            scope.launch { bridge.connected.collect { requestConnectionRefresh() } }
+        }
         scope.launch {
             _connectionStatus.subscriptionCount
                 .map { it > 0 }
@@ -175,10 +184,16 @@ class WearNavigationRepository(
         var last: Result<Unit> = Result.failure(IllegalStateException("Sin intentos"))
         for (attempt in 0 until MAX_SEND_ATTEMPTS) {
             last = runCatchingWear {
-                val node = resolveTargetNode() ?: throw IllegalStateException("WanderAI no está conectado")
+                val node = resolveTargetNode()
+                val bridge = devBridge?.takeIf { it.connected.value }
+                if (node == null && bridge == null) throw IllegalStateException("WanderAI no está conectado")
                 val payload = parser.encode(UserAction(action, clock()))
                 withTimeout(SEND_TIMEOUT_MS) {
-                    messageClient.sendMessage(node.id, DataLayerContract.PATH_USER_ACTION, payload).await()
+                    if (node != null) {
+                        messageClient.sendMessage(node.id, DataLayerContract.PATH_USER_ACTION, payload).await()
+                    } else {
+                        check(bridge!!.send(DataLayerContract.PATH_USER_ACTION, payload)) { "Puente local sin conexión" }
+                    }
                 }
                 markSynced()
             }
@@ -216,6 +231,12 @@ class WearNavigationRepository(
                 .nodes
             val candidates = capable.ifEmpty { nodeClient.connectedNodes.await().toSet() }
             candidates.firstOrNull { it.isNearby } ?: candidates.firstOrNull()
+        }
+
+        // Emulador sin emparejamiento de Play services: el puente ADB cuenta como conexión.
+        if (result.getOrNull() == null && devBridge?.connected?.value == true) {
+            updateConnection(ConnectionStatus.Connected(LocalDevBridgeClient.NODE_NAME, isNearby = true))
+            return null
         }
 
         updateConnection(
@@ -286,10 +307,23 @@ class WearNavigationRepository(
 
 /**
  * Lectura defensiva del DataMap: el teléfono podría escribir la distancia como
- * Int, Long, Float o Double según la implementación.
+ * Int, Long, Float, Double o texto formateado (WanderAI envía "850 m" / "1.4 km").
  */
 fun DataMap.toActiveRoute(): ActiveRoute = ActiveRoute(
-    currentDestination = getString(DataLayerContract.KEY_CURRENT_DESTINATION),
-    remainingDistanceMeters = (get<Any?>(DataLayerContract.KEY_REMAINING_DISTANCE) as? Number)?.toDouble(),
+    currentDestination = getString(DataLayerContract.KEY_CURRENT_DESTINATION)?.takeIf { it.isNotBlank() },
+    remainingDistanceMeters = when (val raw = get<Any?>(DataLayerContract.KEY_REMAINING_DISTANCE)) {
+        is Number -> raw.toDouble()
+        is String -> parseDistanceMeters(raw)
+        else -> null
+    },
     routeActive = getBoolean(DataLayerContract.KEY_ROUTE_ACTIVE, false),
 )
+
+private val DISTANCE_TEXT = Regex("""^\s*(\d+(?:[.,]\d+)?)\s*(km|m)?\s*$""", RegexOption.IGNORE_CASE)
+
+/** "850 m" -> 850.0, "1.4 km" / "1,4 km" -> 1400.0, "120" -> 120.0; null si no se entiende. */
+internal fun parseDistanceMeters(text: String): Double? {
+    val match = DISTANCE_TEXT.matchEntire(text) ?: return null
+    val value = match.groupValues[1].replace(',', '.').toDoubleOrNull() ?: return null
+    return if (match.groupValues[2].equals("km", ignoreCase = true)) value * 1_000 else value
+}
