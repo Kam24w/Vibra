@@ -60,6 +60,8 @@ data class UserAction(
 @Serializable
 enum class UserActionType {
     @SerialName("REPEAT_INSTRUCTION") REPEAT_INSTRUCTION,
+    @SerialName("PAUSE_GUIDANCE") PAUSE_GUIDANCE,
+    @SerialName("RESUME_GUIDANCE") RESUME_GUIDANCE,
     @SerialName("STOP_NAVIGATION") STOP_NAVIGATION,
     @SerialName("ACKNOWLEDGE") ACKNOWLEDGE,
 }
@@ -67,7 +69,12 @@ enum class UserActionType {
 sealed interface ConnectionStatus {
     data object Unknown : ConnectionStatus
     data object Disconnected : ConnectionStatus
-    data class Connected(val nodeName: String) : ConnectionStatus
+
+    /**
+     * @param isNearby true si el nodo está enlazado directamente por Bluetooth;
+     * false si la Data Layer llega por Wi-Fi/nube.
+     */
+    data class Connected(val nodeName: String, val isNearby: Boolean = true) : ConnectionStatus
 
     /** La API de Wearable no está disponible (p. ej. falta Google Play Services / emulador sin emparejar). */
     data class Unavailable(val reason: String) : ConnectionStatus

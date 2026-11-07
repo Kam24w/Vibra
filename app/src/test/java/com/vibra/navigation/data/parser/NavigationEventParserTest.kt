@@ -73,4 +73,15 @@ class NavigationEventParserTest {
         val json = parser.encode(UserAction(UserActionType.STOP_NAVIGATION, 42L)).decodeToString()
         assertEquals("""{"action":"STOP_NAVIGATION","timestamp":42}""", json)
     }
+    @Test
+    fun `encodes pause and resume guidance actions`() {
+        assertEquals(
+            """{"action":"PAUSE_GUIDANCE","timestamp":1}""",
+            parser.encode(UserAction(UserActionType.PAUSE_GUIDANCE, 1L)).decodeToString(),
+        )
+        assertEquals(
+            """{"action":"RESUME_GUIDANCE","timestamp":2}""",
+            parser.encode(UserAction(UserActionType.RESUME_GUIDANCE, 2L)).decodeToString(),
+        )
+    }
 }
