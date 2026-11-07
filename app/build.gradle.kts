@@ -11,7 +11,9 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.vibra.navigation"
+        // Debe coincidir con WanderAI (teléfono): la Data Layer solo entrega mensajes y
+        // DataItems entre apps con el mismo applicationId y la misma firma.
+        applicationId = "com.vibra.wanderai"
         minSdk = 30
         targetSdk = 37
         versionCode = 1
@@ -34,6 +36,7 @@ android {
     useLibrary("wear-sdk")
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
