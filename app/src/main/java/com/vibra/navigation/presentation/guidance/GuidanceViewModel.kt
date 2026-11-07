@@ -1,14 +1,9 @@
-package com.vibra.navigation.presentation
+package com.vibra.navigation.presentation.guidance
 
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.vibra.navigation.R
-import com.vibra.navigation.VibraApplication
 import com.vibra.navigation.data.model.ActiveRoute
 import com.vibra.navigation.data.model.ConnectionStatus
 import com.vibra.navigation.data.model.NavigationAction
@@ -16,6 +11,7 @@ import com.vibra.navigation.data.model.NavigationEvent
 import com.vibra.navigation.data.model.UserActionType
 import com.vibra.navigation.data.repository.NavigationRepository
 import com.vibra.navigation.haptics.VibrationManager
+import com.vibra.navigation.presentation.components.containerViewModelFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -24,15 +20,16 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** Estado inmutable que consume la UI. */
-data class NavigationUiState(
+/** Estado inmutable de la pantalla de navegación háptica. */
+data class GuidanceUiState(
     val connection: ConnectionStatus = ConnectionStatus.Unknown,
     val route: ActiveRoute = ActiveRoute.Inactive,
     val maneuver: ManeuverUi? = null,
+    val isPaused: Boolean = false,
     val isSending: Boolean = false,
-    @param:StringRes val errorMessage: Int? = null,
+    @param:StringRes val message: Int? = null,
 ) {
-    val canSendActions: Boolean get() = connection is ConnectionStatus.Connected && !isSending
+    val hasGuidance: Boolean get() = route.routeActive || maneuver != null
 }
 
 data class ManeuverUi(
@@ -43,69 +40,75 @@ data class ManeuverUi(
     val distanceMeters: Int?,
 )
 
-private data class LocalState(val isSending: Boolean = false, @param:StringRes val errorMessage: Int? = null)
+private data class LocalState(val isSending: Boolean = false, @param:StringRes val message: Int? = null)
 
-class NavigationViewModel(
+class GuidanceViewModel(
     private val repository: NavigationRepository,
-    private val vibrationManager: VibrationManager?,
+    private val vibrationManager: VibrationManager,
 ) : ViewModel() {
 
     private val localState = MutableStateFlow(LocalState())
 
-    val uiState: StateFlow<NavigationUiState> = combine(
+    val uiState: StateFlow<GuidanceUiState> = combine(
         repository.connectionStatus,
         repository.activeRoute,
         repository.latestEvent,
+        repository.guidancePaused,
         localState,
-    ) { connection, route, event, local ->
-        NavigationUiState(
+    ) { connection, route, event, paused, local ->
+        GuidanceUiState(
             connection = connection,
             route = route,
             maneuver = event?.toUi(),
+            isPaused = paused,
             isSending = local.isSending,
-            errorMessage = local.errorMessage,
+            message = local.message,
         )
-    }.stateIn(
-        scope = viewModelScope,
-        // Mantiene el flujo 5 s tras perder suscriptores (rotación / cambios de config).
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = NavigationUiState(),
-    )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), GuidanceUiState())
 
-    /** Se llama cuando la pantalla pasa a visible. */
     fun refresh() {
         viewModelScope.launch { repository.refresh() }
     }
 
+    /** Vuelve a vibrar la última indicación en el reloj y avisa a WanderAI. */
     fun repeatInstruction() {
-        repository.latestEvent.value?.let { vibrationManager?.vibrate(it) }
+        repository.latestEvent.value?.let(vibrationManager::vibrate)
         send(UserActionType.REPEAT_INSTRUCTION)
     }
 
-    fun stopNavigation() = send(UserActionType.STOP_NAVIGATION)
+    /**
+     * Pausa/reanuda la guía. El cambio es local e inmediato (el reloj deja de vibrar
+     * aunque no haya enlace) y se notifica a WanderAI; si no llega, se reenvía al reconectar.
+     */
+    fun togglePause() {
+        val pause = !repository.guidancePaused.value
+        repository.setGuidancePaused(pause)
+        if (pause) vibrationManager.cancel()
+        send(if (pause) UserActionType.PAUSE_GUIDANCE else UserActionType.RESUME_GUIDANCE)
+    }
 
-    fun dismissError() = localState.update { it.copy(errorMessage = null) }
+    fun dismissMessage() = localState.update { it.copy(message = null) }
 
     private fun send(action: UserActionType) {
-        if (localState.value.isSending) return
-        localState.update { it.copy(isSending = true, errorMessage = null) }
+        localState.update { it.copy(isSending = true, message = null) }
         viewModelScope.launch {
             val result = repository.sendUserAction(action)
             localState.update {
                 it.copy(
                     isSending = false,
-                    errorMessage = if (result.isFailure) R.string.error_send_failed else null,
+                    message = when {
+                        result.isSuccess -> null
+                        action == UserActionType.REPEAT_INSTRUCTION -> R.string.error_send_failed
+                        else -> R.string.error_send_queued
+                    },
                 )
             }
         }
     }
 
     companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                val container = (this[APPLICATION_KEY] as VibraApplication).container
-                NavigationViewModel(container.navigationRepository, container.vibrationManager)
-            }
+        val Factory = containerViewModelFactory { c ->
+            GuidanceViewModel(c.navigationRepository, c.vibrationManager)
         }
     }
 }

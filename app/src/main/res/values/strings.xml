@@ -1,26 +1,62 @@
 <resources>
     <string name="app_name">Vibra</string>
+    <string name="splash_tagline">Navegación háptica</string>
 
-    <string name="status_connected">Conectado a %1$s</string>
+    <!-- Conexión -->
     <string name="status_disconnected">Teléfono desconectado</string>
     <string name="status_searching">Emparejando…</string>
     <string name="status_unavailable">Data Layer no disponible</string>
+    <string name="link_title">Enlace con WanderAI</string>
+    <string name="link_bluetooth">Conectado · Bluetooth</string>
+    <string name="link_cloud">Conectado · Wi-Fi / nube</string>
 
+    <!-- Sincronización y batería -->
+    <string name="sync_label">Sincronizado: %1$s</string>
+    <string name="sync_never">sin datos aún</string>
+    <string name="sync_now">ahora</string>
+    <string name="sync_seconds">hace %1$d s</string>
+    <string name="sync_minutes">hace %1$d min</string>
+    <string name="battery_label">Batería háptica</string>
+    <string name="battery_percent">%1$d%%</string>
+    <string name="battery_charging">%1$d%% ⚡</string>
+
+    <!-- Inicio -->
+    <string name="home_open_guidance">Navegación</string>
+    <string name="home_no_route">Sin ruta activa</string>
+    <string name="home_open_haptics">Test háptico</string>
+
+    <!-- Navegación háptica -->
     <string name="waiting_title">Sin ruta activa</string>
     <string name="waiting_body">Inicia una ruta en WanderAI desde el teléfono</string>
     <string name="waiting_instruction">Esperando indicación…</string>
-
     <string name="destination_format">Destino: %1$s</string>
     <string name="remaining_label">Restante: %1$s</string>
     <string name="distance_meters">%1$d m</string>
     <string name="distance_km">%1$.1f km</string>
-
-    <string name="action_repeat">Repetir</string>
-    <string name="action_stop">Detener ruta</string>
-    <string name="action_retry">Reintentar</string>
-
+    <string name="guidance_paused_banner">Guía en pausa</string>
+    <string name="action_repeat">Repetir indicación</string>
+    <string name="action_pause">Pausar guía</string>
+    <string name="action_resume">Reanudar guía</string>
     <string name="error_send_failed">No se pudo enviar al teléfono</string>
+    <string name="error_send_queued">Sin enlace: se enviará al reconectar</string>
 
+    <!-- Test háptico -->
+    <string name="haptics_title">Test háptico</string>
+    <string name="haptics_left">Izquierda</string>
+    <string name="haptics_left_hint">2 pulsos</string>
+    <string name="haptics_right">Derecha</string>
+    <string name="haptics_right_hint">3 pulsos</string>
+    <string name="haptics_quick_test">Probar vibración</string>
+    <string name="haptics_patterns">Patrones</string>
+    <string name="pattern_pulse">Pulso</string>
+    <string name="pattern_wave">Onda</string>
+    <string name="pattern_rhythm">Ritmo</string>
+    <string name="haptics_intensity">Intensidad</string>
+    <string name="haptics_intensity_cd">Intensidad %1$d de %2$d</string>
+    <string name="haptics_no_amplitude">Este reloj no permite ajustar la intensidad: solo cambia el patrón.</string>
+    <string name="haptics_no_vibrator">Este dispositivo no tiene vibrador.</string>
+
+    <!-- Accesibilidad de maniobras -->
     <string name="cd_maneuver">Maniobra: %1$s</string>
     <string name="maneuver_turn_left">girar a la izquierda</string>
     <string name="maneuver_turn_right">girar a la derecha</string>

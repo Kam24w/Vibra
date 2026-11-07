@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Paleta de marca extraída de design/logo.png y design/diseño.png. -->
+<!-- Paleta oficial de Vibra (design/diseño.png). Ver presentation/theme/Theme.kt. -->
 <resources>
-    <color name="vibra_navy">#FF0C2448</color>
-    <color name="vibra_navy_panel">#FF1F3D57</color>
-    <color name="vibra_orange">#FFF07A1A</color>
-    <color name="vibra_cream">#FFF2EFE1</color>
-    <color name="vibra_blue">#FF2484B4</color>
+    <color name="vibra_navy">#FF0F2537</color>
+    <color name="vibra_orange">#FFFF6B00</color>
+    <color name="vibra_cream">#FFF4EEE2</color>
+    <color name="vibra_beige">#FFE6DBC5</color>
 </resources>
