@@ -9,8 +9,6 @@ import com.google.android.gms.wearable.MessageEvent
 import com.google.android.gms.wearable.WearableListenerService
 import com.vibra.navigation.VibraApplication
 import com.vibra.navigation.data.model.ActiveRoute
-import com.vibra.navigation.data.parser.ParseResult
-import com.vibra.navigation.data.repository.EventDisposition
 import com.vibra.navigation.data.repository.toActiveRoute
 import com.vibra.navigation.data.wear.DataLayerContract
 
@@ -29,23 +27,7 @@ class VibraListenerService : WearableListenerService() {
     override fun onMessageReceived(messageEvent: MessageEvent) {
         if (messageEvent.path != DataLayerContract.PATH_NAVIGATION_EVENT) return
 
-        when (val result = container.parser.parse(messageEvent.data)) {
-            is ParseResult.Failure -> Log.w(TAG, "Evento descartado: ${result.reason}", result.cause)
-            is ParseResult.Success -> {
-                val event = result.event
-                val repository = container.navigationRepository
-                when (repository.onNavigationEvent(event)) {
-                    EventDisposition.NEW ->
-                        if (repository.guidancePaused.value) {
-                            Log.i(TAG, "Guía en pausa: ${event.action} sin vibración")
-                        } else {
-                            container.vibrationManager.vibrate(event)
-                        }
-                    EventDisposition.STALE -> Log.i(TAG, "Evento atrasado, se muestra sin vibrar: ${event.action}")
-                    EventDisposition.DUPLICATE -> Log.d(TAG, "Evento duplicado ignorado: ${event.timestamp}")
-                }
-            }
-        }
+        container.incomingEventHandler.onNavigationEventPayload(messageEvent.data)
     }
 
     override fun onDataChanged(dataEvents: DataEventBuffer) {
@@ -62,9 +44,7 @@ class VibraListenerService : WearableListenerService() {
                 DataEvent.TYPE_DELETED -> ActiveRoute.Inactive
                 else -> return@forEach
             }
-            val wasActive = container.navigationRepository.activeRoute.value.routeActive
-            container.navigationRepository.onActiveRouteChanged(route)
-            if (wasActive && !route.routeActive) container.vibrationManager.cancel()
+            container.incomingEventHandler.onActiveRoute(route)
         }
     }
 
