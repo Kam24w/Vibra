@@ -20,20 +20,29 @@ import com.vibra.navigation.data.model.NavigationEvent
  * Se usa la categoría ALARM porque Android ignora las vibraciones de apps en
  * background con usos "touch"/"unknown", y el WearableListenerService no es un
  * proceso en primer plano. ALARM además atraviesa el modo No Molestar, que es lo
- * deseado para indicaciones de navegación críticas. Si prefieres respetar No
- * Molestar, cambia a USAGE_NOTIFICATION (puede silenciarse en modo teatro).
+ * deseado para indicaciones de navegación críticas.
+ *
+ * @param intensity factor 0..1 elegido por el usuario (ver HapticSettingsRepository).
  */
-class VibrationManager(context: Context) {
+class VibrationManager(
+    context: Context,
+    private val intensity: () -> Float = { 1f },
+) {
 
     private val vibrator: Vibrator? = resolveVibrator(context.applicationContext)
 
     val isAvailable: Boolean get() = vibrator?.hasVibrator() == true
+
+    /** Sin control de amplitud la intensidad no se puede ajustar (solo on/off). */
+    val hasAmplitudeControl: Boolean get() = vibrator?.hasAmplitudeControl() == true
 
     fun vibrate(event: NavigationEvent) {
         val waveform = event.vibrationPattern?.let(HapticWaveform::from)
             ?: HapticWaveform.defaultFor(event.action)
         vibrate(waveform)
     }
+
+    fun vibrate(preset: HapticPreset) = vibrate(preset.waveform())
 
     fun vibrate(waveform: HapticWaveform) {
         val vibrator = vibrator?.takeIf { it.hasVibrator() } ?: run {
@@ -43,7 +52,7 @@ class VibrationManager(context: Context) {
         try {
             // Cancela un patrón anterior para que la nueva indicación no se solape.
             vibrator.cancel()
-            val effect = waveform.toEffect(vibrator.hasAmplitudeControl())
+            val effect = waveform.scaled(intensity()).toEffect(vibrator.hasAmplitudeControl())
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 vibrateApi33(vibrator, effect)
             } else {
@@ -63,8 +72,27 @@ class VibrationManager(context: Context) {
         if (hasAmplitudeControl) {
             VibrationEffect.createWaveform(timings, amplitudes, NO_REPEAT)
         } else {
-            VibrationEffect.createWaveform(timings, NO_REPEAT)
+            // Sin amplitud: los tramos con amplitud > 0 vibran, el resto son pausas.
+            VibrationEffect.createWaveform(onOffTimings(), NO_REPEAT)
         }
+
+    /** Convierte la onda a la forma alterna pausa/vibración que exige la API sin amplitud. */
+    private fun HapticWaveform.onOffTimings(): LongArray {
+        val result = mutableListOf<Long>()
+        var on = false
+        var acc = 0L
+        for (i in timings.indices) {
+            val segmentOn = amplitudes[i] > 0
+            if (segmentOn != on) {
+                result += acc
+                acc = 0L
+                on = segmentOn
+            }
+            acc += timings[i]
+        }
+        result += acc
+        return result.toLongArray()
+    }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun vibrateApi33(vibrator: Vibrator, effect: VibrationEffect) {
