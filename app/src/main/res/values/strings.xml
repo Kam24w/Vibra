@@ -2,4 +2,14 @@
     <string name="app_name">Vibra</string>
     <string name="hello_world">Hello, %1$s!</string>
     <string name="error_send_failed">No se pudo enviar al teléfono</string>
+    <string name="cd_maneuver">Maniobra: %1$s</string>
+    <string name="maneuver_turn_left">girar a la izquierda</string>
+    <string name="maneuver_turn_right">girar a la derecha</string>
+    <string name="maneuver_slight_left">ligeramente a la izquierda</string>
+    <string name="maneuver_slight_right">ligeramente a la derecha</string>
+    <string name="maneuver_straight">seguir recto</string>
+    <string name="maneuver_u_turn">dar la vuelta</string>
+    <string name="maneuver_arrived">has llegado</string>
+    <string name="maneuver_rerouting">recalculando ruta</string>
+    <string name="maneuver_unknown">indicación</string>
 </resources>
