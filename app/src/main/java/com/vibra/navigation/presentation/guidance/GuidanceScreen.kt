@@ -66,6 +66,7 @@ fun GuidanceRoute(viewModel: GuidanceViewModel = viewModel(factory = GuidanceVie
         state = state,
         onRepeat = viewModel::repeatInstruction,
         onTogglePause = viewModel::togglePause,
+        onStop = viewModel::stopNavigation,
     )
 }
 
@@ -78,6 +79,7 @@ fun GuidanceScreen(
     state: GuidanceUiState,
     onRepeat: () -> Unit,
     onTogglePause: () -> Unit,
+    onStop: () -> Unit,
 ) {
     // La tarjeta de maniobra (ítem 0) es lo primero que debe verse al levantar la muñeca.
     val listState = rememberScalingLazyListState(initialCenterItemIndex = 0)
@@ -133,6 +135,14 @@ fun GuidanceScreen(
                                 fontWeight = FontWeight.Bold,
                             )
                         },
+                    )
+                }
+                item(key = "stop") {
+                    Button(
+                        onClick = onStop,
+                        colors = VibraButtons.danger(),
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text(stringResource(R.string.action_stop), fontWeight = FontWeight.Bold) },
                     )
                 }
                 state.message?.let { message ->
@@ -289,6 +299,7 @@ private fun GuidancePreview() {
                 ),
                 onRepeat = {},
                 onTogglePause = {},
+                onStop = {},
             )
         }
     }
