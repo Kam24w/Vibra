@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Paleta oficial de Vibra (design/diseño.png). Ver presentation/theme/Theme.kt. -->
+<!-- Paleta de Vibra. Ver presentation/theme/Theme.kt. -->
 <resources>
-    <color name="vibra_navy">#FF0F2537</color>
-    <color name="vibra_orange">#FFFF6B00</color>
+    <color name="vibra_black">#FF000000</color>
     <color name="vibra_cream">#FFF4EEE2</color>
-    <color name="vibra_beige">#FFE6DBC5</color>
 </resources>
