@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -24,12 +25,43 @@ import kotlinx.coroutines.launch
 data class GuidanceUiState(
     val connection: ConnectionStatus = ConnectionStatus.Unknown,
     val route: ActiveRoute = ActiveRoute.Inactive,
+    /** 0..1 recorrido de la ruta; null si aún no se puede calcular. */
+    val routeProgress: Float? = null,
     val maneuver: ManeuverUi? = null,
     val isPaused: Boolean = false,
     val isSending: Boolean = false,
     @param:StringRes val message: Int? = null,
 ) {
     val hasGuidance: Boolean get() = route.routeActive || maneuver != null
+    val isAlert: Boolean get() = maneuver?.action == NavigationAction.ALERT
+}
+
+/**
+ * Progreso de la ruta a partir de la distancia restante: la primera distancia (o la
+ * mayor, si el teléfono recalcula a una ruta más larga) de cada destino es la base.
+ */
+data class RouteProgress(
+    val route: ActiveRoute = ActiveRoute.Inactive,
+    val baselineMeters: Double? = null,
+) {
+    val fraction: Float?
+        get() {
+            val base = baselineMeters?.takeIf { it > 0 } ?: return null
+            val remaining = route.remainingDistanceMeters ?: return null
+            return (1 - remaining / base).toFloat().coerceIn(0f, 1f)
+        }
+
+    fun next(update: ActiveRoute): RouteProgress {
+        if (!update.routeActive) return RouteProgress(update, null)
+        val remaining = update.remainingDistanceMeters
+        val sameRoute = route.routeActive && route.currentDestination == update.currentDestination
+        val baseline = when {
+            remaining == null -> baselineMeters.takeIf { sameRoute }
+            !sameRoute || baselineMeters == null || remaining > baselineMeters -> remaining
+            else -> baselineMeters
+        }
+        return RouteProgress(update, baseline)
+    }
 }
 
 data class ManeuverUi(
@@ -51,14 +83,15 @@ class GuidanceViewModel(
 
     val uiState: StateFlow<GuidanceUiState> = combine(
         repository.connectionStatus,
-        repository.activeRoute,
+        repository.activeRoute.scan(RouteProgress(), RouteProgress::next),
         repository.latestEvent,
         repository.guidancePaused,
         localState,
-    ) { connection, route, event, paused, local ->
+    ) { connection, progress, event, paused, local ->
         GuidanceUiState(
             connection = connection,
-            route = route,
+            route = progress.route,
+            routeProgress = progress.fraction,
             maneuver = event?.toUi(),
             isPaused = paused,
             isSending = local.isSending,
