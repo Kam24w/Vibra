@@ -168,6 +168,21 @@ private fun DrawScope.drawManeuver(action: NavigationAction, color: Color) {
                 style = Stroke(width = 10f * k, cap = StrokeCap.Round, join = StrokeJoin.Round),
             )
         }
+        NavigationAction.ALERT -> {
+            // Triángulo de aviso con signo de exclamación.
+            drawPath(
+                Path().apply {
+                    moveTo(50 * k, 8 * k)
+                    lineTo(94 * k, 88 * k)
+                    lineTo(6 * k, 88 * k)
+                    close()
+                },
+                color,
+                style = Stroke(width = 9f * k, join = StrokeJoin.Round),
+            )
+            drawLine(color, p(50f, 36f), p(50f, 62f), strokeWidth = 10f * k, cap = StrokeCap.Round)
+            drawCircle(color, radius = 6f * k, center = p(50f, 76f))
+        }
         else -> { // STRAIGHT / UNKNOWN
             drawLine(color, p(50f, 92f), p(50f, 32f), strokeWidth = 14f * k, cap = StrokeCap.Round)
             head(p(50f, 6f), p(74f, 38f), p(26f, 38f))
@@ -198,5 +213,6 @@ private fun NavigationAction.labelRes(): Int = when (this) {
     NavigationAction.U_TURN -> R.string.maneuver_u_turn
     NavigationAction.ARRIVED -> R.string.maneuver_arrived
     NavigationAction.REROUTING -> R.string.maneuver_rerouting
+    NavigationAction.ALERT -> R.string.maneuver_alert
     NavigationAction.UNKNOWN -> R.string.maneuver_unknown
 }
