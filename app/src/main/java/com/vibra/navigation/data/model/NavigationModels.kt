@@ -18,6 +18,8 @@ enum class NavigationAction {
     @SerialName("U_TURN") U_TURN,
     @SerialName("ARRIVED") ARRIVED,
     @SerialName("REROUTING") REROUTING,
+    /** Aviso urgente del teléfono (p. ej. "Buscar mi Vibra"): vibra incluso con la guía en pausa. */
+    @SerialName("ALERT") ALERT,
     UNKNOWN,
 }
 
