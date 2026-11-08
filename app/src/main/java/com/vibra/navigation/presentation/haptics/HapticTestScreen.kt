@@ -79,7 +79,7 @@ fun HapticTestScreen(
                 item(key = "title") {
                     Text(
                         text = stringResource(R.string.haptics_title),
-                        color = VibraColors.Navy,
+                        color = VibraColors.OnSurface,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.ExtraBold,
                     )
@@ -141,7 +141,7 @@ fun HapticTestScreen(
                             text = stringResource(
                                 if (!state.isVibratorAvailable) R.string.haptics_no_vibrator else R.string.haptics_no_amplitude,
                             ),
-                            color = VibraColors.NavyMuted,
+                            color = VibraColors.OnSurfaceMuted,
                             fontSize = 11.sp,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.fillMaxWidth(),
@@ -170,7 +170,7 @@ private fun SideButton(
             bounce.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
         }
     }
-    val ring by animateColorAsState(if (highlighted) VibraColors.Orange else VibraColors.Navy, label = "ring")
+    val ring by animateColorAsState(if (highlighted) VibraColors.Orange else VibraColors.Outline, label = "ring")
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             contentAlignment = Alignment.Center,
@@ -184,24 +184,24 @@ private fun SideButton(
                 .background(ring)
                 .padding(4.dp)
                 .clip(CircleShape)
-                .background(VibraColors.Navy)
+                .background(VibraColors.Surface)
                 .clickable(role = Role.Button, onClick = onClick)
                 .semantics { contentDescription = "$label. $hint" },
         ) {
-            ManeuverIndicator(action = action, eventId = 0L, color = VibraColors.Cream, size = 38.dp)
+            ManeuverIndicator(action = action, eventId = 0L, color = VibraColors.OnSurface, size = 38.dp)
         }
-        Text(label, color = VibraColors.Navy, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-        Text(hint, color = VibraColors.NavyMuted, fontSize = 10.sp)
+        Text(label, color = VibraColors.OnSurface, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+        Text(hint, color = VibraColors.OnSurfaceMuted, fontSize = 10.sp)
     }
 }
 
 /** Chip de patrón (Pulso / Onda / Ritmo). */
 @Composable
 private fun PatternChip(label: String, selected: Boolean, onClick: () -> Unit) {
-    val bg by animateColorAsState(if (selected) VibraColors.Orange else VibraColors.Beige, label = "chip")
+    val bg by animateColorAsState(if (selected) VibraColors.Orange else VibraColors.SurfaceHigh, label = "chip")
     Text(
         text = label,
-        color = VibraColors.Navy,
+        color = if (selected) VibraColors.OnOrange else VibraColors.OnSurface,
         fontSize = 12.sp,
         fontWeight = FontWeight.Bold,
         textAlign = TextAlign.Center,
@@ -217,7 +217,7 @@ private fun PatternChip(label: String, selected: Boolean, onClick: () -> Unit) {
 private fun SectionLabel(text: String) {
     Text(
         text = text,
-        color = VibraColors.NavyMuted,
+        color = VibraColors.OnSurfaceMuted,
         fontSize = 12.sp,
         fontWeight = FontWeight.SemiBold,
         textAlign = TextAlign.Center,
@@ -240,7 +240,7 @@ private fun IntensityStepper(state: HapticTestUiState, onChange: (Int) -> Unit) 
         Row(Modifier.padding(horizontal = 8.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             for (level in state.minLevel..state.maxLevel) {
                 val filled = level <= state.intensityLevel
-                val color by animateColorAsState(if (filled) VibraColors.Orange else VibraColors.Beige, label = "lvl")
+                val color by animateColorAsState(if (filled) VibraColors.Orange else VibraColors.SurfaceHigh, label = "lvl")
                 Box(
                     Modifier
                         .width(10.dp)
@@ -261,12 +261,12 @@ private fun StepButton(symbol: String, enabled: Boolean, onClick: () -> Unit) {
         modifier = Modifier
             .size(40.dp)
             .clip(CircleShape)
-            .background(if (enabled) VibraColors.Navy else VibraColors.Beige)
+            .background(if (enabled) VibraColors.SurfaceHigh else VibraColors.Surface)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick),
     ) {
         Text(
             symbol,
-            color = if (enabled) VibraColors.Cream else VibraColors.NavyMuted,
+            color = if (enabled) VibraColors.OnSurface else VibraColors.Disabled,
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
         )
