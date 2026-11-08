@@ -116,4 +116,13 @@ object VibraButtons {
         disabledContainerColor = VibraColors.Beige,
         disabledContentColor = VibraColors.NavyMuted,
     )
+
+    /** Acción destructiva (detener ruta): rojo con texto crema. */
+    @Composable
+    fun danger(): ButtonColors = ButtonDefaults.buttonColors(
+        containerColor = VibraColors.Error,
+        contentColor = VibraColors.CreamLight,
+        disabledContainerColor = VibraColors.Beige,
+        disabledContentColor = VibraColors.NavyMuted,
+    )
 }
