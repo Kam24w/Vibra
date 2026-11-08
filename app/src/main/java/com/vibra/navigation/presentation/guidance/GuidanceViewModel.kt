@@ -87,6 +87,16 @@ class GuidanceViewModel(
         send(if (pause) UserActionType.PAUSE_GUIDANCE else UserActionType.RESUME_GUIDANCE)
     }
 
+    /**
+     * Detiene la ruta: el reloj la cierra al instante y avisa a WanderAI, que cancela la
+     * ruta en el teléfono. Si no hay enlace, STOP_NAVIGATION queda pendiente y se reenvía.
+     */
+    fun stopNavigation() {
+        vibrationManager.cancel()
+        repository.onActiveRouteChanged(ActiveRoute.Inactive)
+        send(UserActionType.STOP_NAVIGATION)
+    }
+
     fun dismissMessage() = localState.update { it.copy(message = null) }
 
     private fun send(action: UserActionType) {
