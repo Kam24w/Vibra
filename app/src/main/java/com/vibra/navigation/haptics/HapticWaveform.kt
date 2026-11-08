@@ -72,6 +72,8 @@ data class HapticWaveform(
                 NavigationAction.U_TURN -> VibrationPattern(pulses = 4, durationMs = 250, amplitude = 255)
                 NavigationAction.ARRIVED -> VibrationPattern(pulses = 1, durationMs = 800, amplitude = 255)
                 NavigationAction.REROUTING -> VibrationPattern(pulses = 2, durationMs = 400, amplitude = 200)
+                // Igual que WanderAI: 5 pulsos cortos a máxima amplitud para que no pase desapercibida.
+                NavigationAction.ALERT -> VibrationPattern(pulses = 5, durationMs = 100, amplitude = 255)
                 NavigationAction.UNKNOWN -> VibrationPattern(pulses = 1, durationMs = 200, amplitude = 200)
             },
         )
