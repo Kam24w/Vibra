@@ -33,11 +33,11 @@ fun VibraApp() {
         val navController = rememberSwipeDismissableNavController()
         AppScaffold(
             timeText = {
-                // Hora en marino sobre una banda crema translúcida: legible sobre el degradado.
-                TimeText(backgroundColor = VibraColors.CreamLight.copy(alpha = 0.85f)) { time ->
+                // Hora centrada arriba, en claro sobre negro: sin banda de fondo en OLED.
+                TimeText { time ->
                     timeTextCurvedText(
                         time,
-                        CurvedTextStyle(color = VibraColors.Navy, fontWeight = FontWeight.Bold),
+                        CurvedTextStyle(color = VibraColors.OnSurface, fontWeight = FontWeight.Bold),
                     )
                 }
             },
