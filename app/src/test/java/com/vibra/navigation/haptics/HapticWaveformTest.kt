@@ -71,4 +71,11 @@ class HapticWaveformTest {
             assertTrue("$preset demasiado largo", wave.totalDurationMs in 1..2_000)
         }
     }
+
+    @Test
+    fun `alert default is five short full strength pulses`() {
+        val wave = HapticWaveform.defaultFor(NavigationAction.ALERT)
+        assertEquals(5, wave.amplitudes.count { it > 0 })
+        assertTrue(wave.amplitudes.filter { it > 0 }.all { it == 255 })
+    }
 }
