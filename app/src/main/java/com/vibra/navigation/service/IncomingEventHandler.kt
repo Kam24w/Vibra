@@ -2,6 +2,7 @@ package com.vibra.navigation.service
 
 import android.util.Log
 import com.vibra.navigation.data.model.ActiveRoute
+import com.vibra.navigation.data.model.NavigationAction
 import com.vibra.navigation.data.parser.NavigationEventParser
 import com.vibra.navigation.data.parser.ParseResult
 import com.vibra.navigation.data.repository.EventDisposition
@@ -26,7 +27,7 @@ class IncomingEventHandler(
                 val repository = repository()
                 when (repository.onNavigationEvent(event)) {
                     EventDisposition.NEW ->
-                        if (repository.guidancePaused.value) {
+                        if (!shouldVibrate(event.action, repository.guidancePaused.value)) {
                             Log.i(TAG, "Guía en pausa: ${event.action} sin vibración")
                         } else {
                             vibrationManager().vibrate(event)
@@ -45,7 +46,11 @@ class IncomingEventHandler(
         if (wasActive && !route.routeActive) vibrationManager().cancel()
     }
 
-    private companion object {
-        const val TAG = "VibraListenerService"
+    companion object {
+        private const val TAG = "VibraListenerService"
+
+        /** Con la guía en pausa solo vibran las alertas: WanderAI las envía a propósito. */
+        fun shouldVibrate(action: NavigationAction, guidancePaused: Boolean): Boolean =
+            !guidancePaused || action == NavigationAction.ALERT
     }
 }
