@@ -11,7 +11,6 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,7 +29,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -38,12 +38,12 @@ import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material3.Text
 import com.vibra.navigation.R
 import com.vibra.navigation.presentation.theme.VibraColors
-import com.vibra.navigation.presentation.theme.VibraGradients
+import com.vibra.navigation.presentation.components.VibraLogoBadge
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * Splash animado de marca. Continúa al splash del sistema (mismo logo sobre crema):
+ * Splash animado de marca. Continúa al splash del sistema (mismo logo sobre negro):
  * el logo "aterriza" con un rebote, ondas de vibración se expanden a sus lados y
  * aparece la palabra Vibra. Dura [SPLASH_DURATION_MS] y luego llama a [onFinished].
  */
@@ -63,6 +63,7 @@ fun SplashScreen(onFinished: () -> Unit) {
         finish()
     }
 
+    val appName = stringResource(R.string.app_name)
     val waves = rememberInfiniteTransition(label = "waves")
     val wave by waves.animateFloat(
         initialValue = 0f,
@@ -75,7 +76,7 @@ fun SplashScreen(onFinished: () -> Unit) {
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .fillMaxSize()
-            .background(VibraGradients.Splash),
+            .background(VibraColors.Background),
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.size(150.dp)) {
@@ -89,23 +90,23 @@ fun SplashScreen(onFinished: () -> Unit) {
                         val arcSize = Size(radius * 2, radius * 2)
                         val stroke = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round)
                         drawArc(VibraColors.Orange.copy(alpha = alpha), 140f, 80f, false, topLeft, arcSize, style = stroke)
-                        drawArc(VibraColors.Navy.copy(alpha = alpha), -40f, 80f, false, topLeft, arcSize, style = stroke)
+                        drawArc(VibraColors.Emerald.copy(alpha = alpha), -40f, 80f, false, topLeft, arcSize, style = stroke)
                     }
                 }
-                Image(
-                    painter = painterResource(R.drawable.vibra_logo),
-                    contentDescription = stringResource(R.string.app_name),
+                // Insignia clara: el logo tiene trazos marino que no se verían sobre negro.
+                VibraLogoBadge(
+                    size = 88.dp,
                     modifier = Modifier
-                        .size(84.dp)
                         .graphicsLayer {
                             scaleX = logoScale.value
                             scaleY = logoScale.value
-                        },
+                        }
+                        .semantics { contentDescription = appName },
                 )
             }
             Text(
                 text = stringResource(R.string.app_name),
-                color = VibraColors.Navy,
+                color = VibraColors.OnSurface,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.ExtraBold,
                 modifier = Modifier.graphicsLayer {
@@ -115,7 +116,7 @@ fun SplashScreen(onFinished: () -> Unit) {
             )
             Text(
                 text = stringResource(R.string.splash_tagline),
-                color = VibraColors.NavyMuted,
+                color = VibraColors.OnSurfaceMuted,
                 fontSize = 12.sp,
                 modifier = Modifier
                     .padding(top = 2.dp)
