@@ -37,6 +37,7 @@
     <string name="action_repeat">Repetir indicación</string>
     <string name="action_pause">Pausar guía</string>
     <string name="action_resume">Reanudar guía</string>
+    <string name="action_stop">Detener ruta</string>
     <string name="error_send_failed">No se pudo enviar al teléfono</string>
     <string name="error_send_queued">Sin enlace: se enviará al reconectar</string>
 
@@ -66,5 +67,6 @@
     <string name="maneuver_u_turn">dar la vuelta</string>
     <string name="maneuver_arrived">has llegado</string>
     <string name="maneuver_rerouting">recalculando ruta</string>
+    <string name="maneuver_alert">alerta, revisa el teléfono</string>
     <string name="maneuver_unknown">indicación</string>
 </resources>
