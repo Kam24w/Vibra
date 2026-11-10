@@ -1,6 +1,13 @@
 <resources>
     <string name="app_name">Vibra</string>
     <string name="splash_tagline">Navegación háptica</string>
+    <string name="splash_start">Comenzar Rumbo</string>
+
+    <!-- Búsqueda del teléfono -->
+    <string name="link_searching">Buscando tu celular…</string>
+    <string name="link_found">Celular encontrado</string>
+    <string name="link_hint">Abre WanderAI en tu celular</string>
+    <string name="link_skip">Omitir</string>
 
     <!-- Conexión -->
     <string name="status_connected">Conectado</string>
@@ -15,6 +22,7 @@
     <string name="sync_seconds">hace %1$d s</string>
     <string name="sync_minutes">hace %1$d min</string>
     <string name="battery_label">Batería háptica</string>
+    <string name="battery_short">Batería</string>
     <string name="battery_percent">%1$d%%</string>
     <string name="battery_charging">%1$d%% ⚡</string>
 
@@ -23,6 +31,7 @@
     <string name="home_no_route">Sin ruta activa</string>
     <string name="home_route_active">Ruta activa</string>
     <string name="home_open_haptics">Test háptico</string>
+    <string name="home_start_hint">Inicia una ruta en WanderAI</string>
 
     <!-- Navegación háptica -->
     <string name="waiting_title">Sin ruta activa</string>
@@ -45,16 +54,23 @@
     <!-- Test háptico -->
     <string name="haptics_title">Test háptico</string>
     <string name="haptics_left">Izquierda</string>
-    <string name="haptics_left_hint">2 pulsos</string>
+    <string name="haptics_left_hint">Pulso rítmico</string>
     <string name="haptics_right">Derecha</string>
-    <string name="haptics_right_hint">3 pulsos</string>
+    <string name="haptics_right_hint">Doble pulso</string>
+    <string name="haptics_straight">Recto</string>
+    <string name="haptics_straight_hint">Triple que acelera</string>
+    <string name="haptics_u_turn">Regresar</string>
+    <string name="haptics_u_turn_hint">Alerta intermitente</string>
     <string name="haptics_quick_test">Probar vibración</string>
     <string name="haptics_patterns">Patrones</string>
     <string name="pattern_pulse">Pulso</string>
     <string name="pattern_wave">Onda</string>
     <string name="pattern_rhythm">Ritmo</string>
     <string name="haptics_intensity">Intensidad</string>
-    <string name="haptics_intensity_cd">Intensidad %1$d de %2$d</string>
+    <string name="intensity_off">Vibración apagada</string>
+    <string name="intensity_soft">Suave</string>
+    <string name="intensity_medium">Media</string>
+    <string name="intensity_strong">Fuerte</string>
     <string name="haptics_no_amplitude">Este reloj no permite ajustar la intensidad: solo cambia el patrón.</string>
     <string name="haptics_no_vibrator">Este dispositivo no tiene vibrador.</string>
 

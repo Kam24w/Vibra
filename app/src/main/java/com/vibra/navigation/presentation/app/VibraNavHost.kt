@@ -1,6 +1,7 @@
 package com.vibra.navigation.presentation.app
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.wear.compose.foundation.CurvedTextStyle
 import androidx.wear.compose.material3.AppScaffold
@@ -12,15 +13,19 @@ import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import com.vibra.navigation.presentation.guidance.GuidanceRoute
 import com.vibra.navigation.presentation.haptics.HapticTestRoute
+import com.vibra.navigation.presentation.haptics.IntensityRoute
+import com.vibra.navigation.presentation.link.LinkSearchRoute
 import com.vibra.navigation.presentation.home.HomeRoute
 import com.vibra.navigation.presentation.splash.SplashScreen
 import com.vibra.navigation.presentation.theme.VibraTheme
 
 object VibraDestinations {
     const val SPLASH = "splash"
+    const val LINK = "link"
     const val HOME = "home"
     const val GUIDANCE = "guidance"
     const val HAPTICS = "haptics"
+    const val INTENSITY = "intensity"
 }
 
 /**
@@ -33,11 +38,11 @@ fun VibraApp() {
         val navController = rememberSwipeDismissableNavController()
         AppScaffold(
             timeText = {
-                // Hora centrada arriba, en claro sobre negro: sin banda de fondo en OLED.
-                TimeText { time ->
+                // Hora en marino sobre el marfil, sin banda de fondo.
+                TimeText(backgroundColor = Color.Transparent) { time ->
                     timeTextCurvedText(
                         time,
-                        CurvedTextStyle(color = VibraColors.OnSurface, fontWeight = FontWeight.Bold),
+                        CurvedTextStyle(color = VibraColors.NavyInk, fontWeight = FontWeight.Bold),
                     )
                 }
             },
@@ -48,9 +53,19 @@ fun VibraApp() {
             ) {
                 composable(VibraDestinations.SPLASH) {
                     SplashScreen(
-                        onFinished = {
-                            navController.navigate(VibraDestinations.HOME) {
+                        onStart = {
+                            navController.navigate(VibraDestinations.LINK) {
                                 popUpTo(VibraDestinations.SPLASH) { inclusive = true }
+                            }
+                        },
+                    )
+                }
+                composable(VibraDestinations.LINK) {
+                    LinkSearchRoute(
+                        onLinked = {
+                            navController.navigate(VibraDestinations.HOME) {
+                                popUpTo(VibraDestinations.LINK) { inclusive = true }
+                                launchSingleTop = true
                             }
                         },
                     )
@@ -66,7 +81,14 @@ fun VibraApp() {
                     )
                 }
                 composable(VibraDestinations.GUIDANCE) { GuidanceRoute() }
-                composable(VibraDestinations.HAPTICS) { HapticTestRoute() }
+                composable(VibraDestinations.HAPTICS) {
+                    HapticTestRoute(
+                        onOpenIntensity = {
+                            navController.navigate(VibraDestinations.INTENSITY) { launchSingleTop = true }
+                        },
+                    )
+                }
+                composable(VibraDestinations.INTENSITY) { IntensityRoute() }
             }
         }
     }
