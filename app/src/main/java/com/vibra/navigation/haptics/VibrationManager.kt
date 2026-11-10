@@ -49,10 +49,16 @@ class VibrationManager(
             Log.w(TAG, "Dispositivo sin vibrador")
             return
         }
+        val factor = intensity()
+        if (factor <= 0f) {
+            // Intensidad al 0 %: el usuario apagó el motor desde el ajuste.
+            vibrator.cancel()
+            return
+        }
         try {
             // Cancela un patrón anterior para que la nueva indicación no se solape.
             vibrator.cancel()
-            val effect = waveform.scaled(intensity()).toEffect(vibrator.hasAmplitudeControl())
+            val effect = waveform.scaled(factor).toEffect(vibrator.hasAmplitudeControl())
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 vibrateApi33(vibrator, effect)
             } else {

@@ -61,21 +61,51 @@ data class HapticWaveform(
             return HapticWaveform(timings, amplitudes)
         }
 
-        /** Patrón por defecto si WanderAI no envía `vibration_pattern`. */
-        fun defaultFor(action: NavigationAction): HapticWaveform = from(
-            when (action) {
-                NavigationAction.TURN_LEFT -> VibrationPattern(pulses = 2, durationMs = 150, amplitude = 255)
-                NavigationAction.TURN_RIGHT -> VibrationPattern(pulses = 3, durationMs = 150, amplitude = 255)
-                NavigationAction.SLIGHT_LEFT -> VibrationPattern(pulses = 2, durationMs = 80, amplitude = 180)
-                NavigationAction.SLIGHT_RIGHT -> VibrationPattern(pulses = 3, durationMs = 80, amplitude = 180)
-                NavigationAction.STRAIGHT -> VibrationPattern(pulses = 1, durationMs = 120, amplitude = 150)
-                NavigationAction.U_TURN -> VibrationPattern(pulses = 4, durationMs = 250, amplitude = 255)
-                NavigationAction.ARRIVED -> VibrationPattern(pulses = 1, durationMs = 800, amplitude = 255)
-                NavigationAction.REROUTING -> VibrationPattern(pulses = 2, durationMs = 400, amplitude = 200)
-                // Igual que WanderAI: 5 pulsos cortos a máxima amplitud para que no pase desapercibida.
-                NavigationAction.ALERT -> VibrationPattern(pulses = 5, durationMs = 100, amplitude = 255)
-                NavigationAction.UNKNOWN -> VibrationPattern(pulses = 1, durationMs = 200, amplitude = 200)
-            },
+        /**
+         * Patrón por defecto si WanderAI no envía `vibration_pattern`. Los cuatro
+         * comandos principales tienen ritmos claramente distintos para reconocerlos
+         * sin mirar el reloj (un solo motor: el lado se codifica en el ritmo).
+         */
+        fun defaultFor(action: NavigationAction): HapticWaveform = when (action) {
+            NavigationAction.TURN_LEFT -> left()
+            NavigationAction.TURN_RIGHT -> right()
+            NavigationAction.STRAIGHT -> straight()
+            NavigationAction.U_TURN -> uTurn()
+            else -> from(
+                when (action) {
+                    NavigationAction.SLIGHT_LEFT -> VibrationPattern(pulses = 2, durationMs = 80, amplitude = 180)
+                    NavigationAction.SLIGHT_RIGHT -> VibrationPattern(pulses = 3, durationMs = 80, amplitude = 180)
+                    NavigationAction.ARRIVED -> VibrationPattern(pulses = 1, durationMs = 800, amplitude = 255)
+                    NavigationAction.REROUTING -> VibrationPattern(pulses = 2, durationMs = 400, amplitude = 200)
+                    // Igual que WanderAI: 5 pulsos cortos a máxima amplitud para que no pase desapercibida.
+                    NavigationAction.ALERT -> VibrationPattern(pulses = 5, durationMs = 100, amplitude = 255)
+                    else -> VibrationPattern(pulses = 1, durationMs = 200, amplitude = 200)
+                },
+            )
+        }
+
+        /** Izquierda: pulso rítmico, tres golpes iguales y regulares. */
+        fun left(): HapticWaveform = HapticWaveform(
+            timings = longArrayOf(0, 160, 160, 160, 160, 160),
+            amplitudes = intArrayOf(0, 255, 0, 255, 0, 255),
+        )
+
+        /** Derecha: pulso rítmico doble, dos parejas de toques ("ta-ta … ta-ta"). */
+        fun right(): HapticWaveform = HapticWaveform(
+            timings = longArrayOf(0, 90, 70, 90, 280, 90, 70, 90),
+            amplitudes = intArrayOf(0, 255, 0, 255, 0, 255, 0, 255),
+        )
+
+        /** Recto: triple pulso que acelera, con pausas cada vez más cortas y más fuerza. */
+        fun straight(): HapticWaveform = HapticWaveform(
+            timings = longArrayOf(0, 200, 240, 140, 120, 90),
+            amplitudes = intArrayOf(0, 150, 0, 200, 0, 255),
+        )
+
+        /** Regresar (vuelta en U): intermitencia de alerta, dos ráfagas de tres toques rápidos. */
+        fun uTurn(): HapticWaveform = HapticWaveform(
+            timings = longArrayOf(0, 60, 60, 60, 60, 60, 300, 60, 60, 60, 60, 60),
+            amplitudes = intArrayOf(0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255),
         )
 
         /** Onda: la amplitud sube y baja de forma progresiva. */
@@ -102,11 +132,13 @@ data class HapticWaveform(
 
 /** Patrones que se pueden sentir desde la pantalla de test háptico. */
 enum class HapticPreset {
-    LEFT, RIGHT, PULSE, WAVE, RHYTHM;
+    LEFT, RIGHT, STRAIGHT, U_TURN, PULSE, WAVE, RHYTHM;
 
     fun waveform(): HapticWaveform = when (this) {
-        LEFT -> HapticWaveform.defaultFor(NavigationAction.TURN_LEFT)
-        RIGHT -> HapticWaveform.defaultFor(NavigationAction.TURN_RIGHT)
+        LEFT -> HapticWaveform.left()
+        RIGHT -> HapticWaveform.right()
+        STRAIGHT -> HapticWaveform.straight()
+        U_TURN -> HapticWaveform.uTurn()
         PULSE -> HapticWaveform.pulse()
         WAVE -> HapticWaveform.wave()
         RHYTHM -> HapticWaveform.rhythm()

@@ -78,4 +78,38 @@ class HapticWaveformTest {
         assertEquals(5, wave.amplitudes.count { it > 0 })
         assertTrue(wave.amplitudes.filter { it > 0 }.all { it == 255 })
     }
+
+    @Test
+    fun `the four navigation commands have distinct rhythms`() {
+        val commands = listOf(
+            NavigationAction.TURN_LEFT,
+            NavigationAction.TURN_RIGHT,
+            NavigationAction.STRAIGHT,
+            NavigationAction.U_TURN,
+        ).map(HapticWaveform::defaultFor)
+
+        assertEquals("todos los patrones deben ser distintos", 4, commands.toSet().size)
+        commands.forEach { wave ->
+            assertTrue(wave.amplitudes.any { it > 0 })
+            assertTrue(wave.totalDurationMs in 1..2_000)
+        }
+    }
+
+    @Test
+    fun `straight pulses accelerate with shrinking gaps and growing strength`() {
+        val wave = HapticWaveform.straight()
+        val gaps = wave.timings.filterIndexed { i, _ -> i > 0 && wave.amplitudes[i] == 0 }
+        val strengths = wave.amplitudes.filter { it > 0 }
+
+        assertEquals(3, strengths.size)
+        assertTrue(gaps.zipWithNext().all { (a, b) -> b < a })
+        assertTrue(strengths.zipWithNext().all { (a, b) -> b > a })
+    }
+
+    @Test
+    fun `u turn is an intermittent alert of two bursts`() {
+        val wave = HapticWaveform.uTurn()
+        assertEquals(6, wave.amplitudes.count { it > 0 })
+        assertTrue(wave.amplitudes.filter { it > 0 }.all { it == 255 })
+    }
 }
