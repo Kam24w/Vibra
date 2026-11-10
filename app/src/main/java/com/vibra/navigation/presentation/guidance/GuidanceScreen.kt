@@ -15,6 +15,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
@@ -52,14 +54,18 @@ import com.vibra.navigation.data.model.ActiveRoute
 import com.vibra.navigation.data.model.ConnectionStatus
 import com.vibra.navigation.data.model.NavigationAction
 import com.vibra.navigation.presentation.components.ConnectionIndicator
+import com.vibra.navigation.presentation.components.HapticCommand
+import com.vibra.navigation.presentation.components.HapticSignature
 import com.vibra.navigation.presentation.components.Pill
 import com.vibra.navigation.presentation.components.ProgressBar
 import com.vibra.navigation.presentation.components.SurfaceCard
 import com.vibra.navigation.presentation.components.VibraBackground
 import com.vibra.navigation.presentation.components.VibraButtons
-import com.vibra.navigation.presentation.components.VibraHeader
+import com.vibra.navigation.presentation.components.BrandWaves
+import com.vibra.navigation.presentation.components.VibraLogoBadge
 import com.vibra.navigation.presentation.components.formatDistance
 import com.vibra.navigation.presentation.theme.VibraColors
+import com.vibra.navigation.presentation.theme.VibraGradients
 import com.vibra.navigation.presentation.theme.VibraTheme
 
 @Composable
@@ -190,8 +196,11 @@ private fun ManeuverPanel(maneuver: ManeuverUi?, isPaused: Boolean) {
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(92.dp)
-                .background(VibraColors.Surface, CircleShape),
+                .size(96.dp)
+                // Aro de marca azul → naranja alrededor de la maniobra.
+                .background(if (isPaused) SolidColor(VibraColors.Outline) else VibraGradients.BrandSweep, CircleShape)
+                .padding(4.dp)
+                .background(VibraGradients.Card, CircleShape),
         ) {
             ManeuverIndicator(
                 action = maneuver?.action ?: NavigationAction.STRAIGHT,
@@ -208,7 +217,7 @@ private fun ManeuverPanel(maneuver: ManeuverUi?, isPaused: Boolean) {
             if (meters != null) {
                 Text(
                     text = formatDistance(meters.toDouble()),
-                    color = if (isPaused) VibraColors.OnSurfaceMuted else VibraColors.Orange,
+                    color = if (isPaused) VibraColors.OnSurfaceMuted else VibraColors.OrangeText,
                     fontSize = 30.sp,
                     fontWeight = FontWeight.ExtraBold,
                     modifier = Modifier.padding(top = 4.dp),
@@ -237,6 +246,31 @@ private fun ManeuverPanel(maneuver: ManeuverUi?, isPaused: Boolean) {
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(horizontal = 8.dp),
             )
+        }
+        // Comando háptico: no solo la flecha, también el ritmo que se siente.
+        HapticCommand.of(maneuver?.action)?.let { command ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .padding(top = 6.dp)
+                    .background(VibraColors.Surface, RoundedCornerShape(50))
+                    .padding(horizontal = 10.dp, vertical = 5.dp),
+            ) {
+                HapticSignature(
+                    waveform = command.preset.waveform(),
+                    color = if (isPaused) VibraColors.Disabled else command.accent,
+                    width = 54.dp,
+                    height = 12.dp,
+                )
+                Text(
+                    text = stringResource(command.hint),
+                    color = VibraColors.OnSurfaceMuted,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    modifier = Modifier.padding(start = 6.dp),
+                )
+            }
         }
     }
 }
@@ -329,7 +363,19 @@ private fun IdleGuidance(connection: ConnectionStatus) {
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        VibraHeader(logoSize = 30.dp)
+        // Logo con las ondas de marca latiendo despacio mientras espera la ruta.
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.size(104.dp)) {
+            BrandWaves(
+                modifier = Modifier.size(104.dp),
+                waves = 3,
+                startFraction = 0.34f,
+                travelFraction = 0.15f,
+                strokeWidth = 3.5.dp,
+                periodMillis = 2_200,
+                maxAlpha = 0.7f,
+            )
+            VibraLogoBadge(size = 62.dp, ring = true)
+        }
         Text(
             text = stringResource(R.string.waiting_title),
             color = VibraColors.OnSurface,
