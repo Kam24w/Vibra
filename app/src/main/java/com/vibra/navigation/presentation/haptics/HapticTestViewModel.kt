@@ -14,19 +14,17 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 
 data class HapticTestUiState(
-    val intensityLevel: Int = HapticSettingsRepository.DEFAULT_LEVEL,
+    val intensityPercent: Int = HapticSettingsRepository.DEFAULT_PERCENT,
     val isVibratorAvailable: Boolean = true,
     val hasAmplitudeControl: Boolean = true,
     /** Último patrón reproducido y contador para animar el botón aunque se repita. */
     val lastPlayed: HapticPreset? = null,
     val playCount: Int = 0,
-) {
-    val minLevel get() = HapticSettingsRepository.MIN_LEVEL
-    val maxLevel get() = HapticSettingsRepository.MAX_LEVEL
-}
+)
 
 private data class Playback(val preset: HapticPreset? = null, val count: Int = 0)
 
+/** Compartido por el test háptico (pantalla 4) y el ajuste de intensidad (pantalla 5). */
 class HapticTestViewModel(
     private val settings: HapticSettingsRepository,
     private val vibrationManager: VibrationManager,
@@ -34,9 +32,9 @@ class HapticTestViewModel(
 
     private val playback = MutableStateFlow(Playback())
 
-    val uiState: StateFlow<HapticTestUiState> = combine(settings.intensityLevel, playback) { level, play ->
+    val uiState: StateFlow<HapticTestUiState> = combine(settings.intensityPercent, playback) { percent, play ->
         HapticTestUiState(
-            intensityLevel = level,
+            intensityPercent = percent,
             isVibratorAvailable = vibrationManager.isAvailable,
             hasAmplitudeControl = vibrationManager.hasAmplitudeControl,
             lastPlayed = play.preset,
@@ -49,12 +47,11 @@ class HapticTestViewModel(
         playback.update { Playback(preset, it.count + 1) }
     }
 
-    /** Cambia la intensidad (se aplica también a la navegación) y la deja sentir. */
-    fun changeIntensity(delta: Int) {
-        val current = settings.intensityLevel.value
-        val next = (current + delta).coerceIn(HapticSettingsRepository.MIN_LEVEL, HapticSettingsRepository.MAX_LEVEL)
-        if (next == current) return
-        settings.setIntensityLevel(next)
+    /** Fija la intensidad (se aplica también a la navegación) y la deja sentir. */
+    fun setIntensity(percent: Int) {
+        val next = percent.coerceIn(HapticSettingsRepository.MIN_PERCENT, HapticSettingsRepository.MAX_PERCENT)
+        if (next == settings.intensityPercent.value) return
+        settings.setIntensityPercent(next)
         play(HapticPreset.PULSE)
     }
 

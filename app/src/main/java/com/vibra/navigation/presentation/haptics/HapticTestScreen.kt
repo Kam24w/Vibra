@@ -5,17 +5,13 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,77 +39,79 @@ import androidx.wear.compose.material3.ScreenScaffold
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
 import com.vibra.navigation.R
-import com.vibra.navigation.data.model.NavigationAction
 import com.vibra.navigation.haptics.HapticPreset
+import com.vibra.navigation.presentation.components.HapticCommand
+import com.vibra.navigation.presentation.components.HapticSignature
 import com.vibra.navigation.presentation.components.VibraBackground
 import com.vibra.navigation.presentation.components.VibraButtons
+import com.vibra.navigation.presentation.components.VibraLogoBadge
 import com.vibra.navigation.presentation.guidance.ManeuverIndicator
 import com.vibra.navigation.presentation.theme.VibraColors
+import com.vibra.navigation.presentation.theme.VibraGradients
 import com.vibra.navigation.presentation.theme.VibraTheme
 
 @Composable
-fun HapticTestRoute(viewModel: HapticTestViewModel = viewModel(factory = HapticTestViewModel.Factory)) {
+fun HapticTestRoute(
+    onOpenIntensity: () -> Unit,
+    viewModel: HapticTestViewModel = viewModel(factory = HapticTestViewModel.Factory),
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    HapticTestScreen(
-        state = state,
-        onPlay = viewModel::play,
-        onIntensityChange = viewModel::changeIntensity,
-    )
+    HapticTestScreen(state = state, onPlay = viewModel::play, onOpenIntensity = onOpenIntensity)
 }
 
-/** Test háptico: sentir izquierda vs derecha, patrones y ajustar la intensidad. */
+/**
+ * Pantalla 4: los cuatro comandos hápticos de navegación (izquierda, derecha,
+ * recto y regresar) en una cuadrícula 2×2 para sentirlos y aprenderlos, más los
+ * patrones libres y el acceso al ajuste de intensidad.
+ */
 @Composable
 fun HapticTestScreen(
     state: HapticTestUiState,
     onPlay: (HapticPreset) -> Unit,
-    onIntensityChange: (Int) -> Unit,
+    onOpenIntensity: () -> Unit,
 ) {
-    val listState = rememberScalingLazyListState()
+    val listState = rememberScalingLazyListState(initialCenterItemIndex = 1)
     VibraBackground {
         ScreenScaffold(scrollState = listState) { contentPadding ->
             ScalingLazyColumn(
                 state = listState,
                 contentPadding = contentPadding,
+                verticalArrangement = Arrangement.spacedBy(6.dp),
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 item(key = "title") {
-                    Text(
-                        text = stringResource(R.string.haptics_title),
-                        color = VibraColors.OnSurface,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                    )
-                }
-                item(key = "sides") {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        SideButton(
-                            label = stringResource(R.string.haptics_left),
-                            hint = stringResource(R.string.haptics_left_hint),
-                            action = NavigationAction.TURN_LEFT,
-                            highlighted = state.lastPlayed == HapticPreset.LEFT,
-                            playCount = if (state.lastPlayed == HapticPreset.LEFT) state.playCount else 0,
-                            onClick = { onPlay(HapticPreset.LEFT) },
-                        )
-                        SideButton(
-                            label = stringResource(R.string.haptics_right),
-                            hint = stringResource(R.string.haptics_right_hint),
-                            action = NavigationAction.TURN_RIGHT,
-                            highlighted = state.lastPlayed == HapticPreset.RIGHT,
-                            playCount = if (state.lastPlayed == HapticPreset.RIGHT) state.playCount else 0,
-                            onClick = { onPlay(HapticPreset.RIGHT) },
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        VibraLogoBadge(size = 22.dp)
+                        Text(
+                            text = stringResource(R.string.haptics_title),
+                            color = VibraColors.OnSurface,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            modifier = Modifier.padding(start = 6.dp),
                         )
                     }
                 }
-                item(key = "quick") {
+                item(key = "row_turns") {
+                    CommandRow(HapticCommand.LEFT, HapticCommand.RIGHT, state, onPlay)
+                }
+                item(key = "row_other") {
+                    CommandRow(HapticCommand.STRAIGHT, HapticCommand.U_TURN, state, onPlay)
+                }
+                item(key = "intensity") {
                     Button(
-                        onClick = { onPlay(HapticPreset.PULSE) },
-                        enabled = state.isVibratorAvailable,
-                        colors = VibraButtons.primary(),
+                        onClick = onOpenIntensity,
+                        colors = VibraButtons.brand(),
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text(stringResource(R.string.haptics_quick_test), fontWeight = FontWeight.Bold) },
+                        label = { Text(stringResource(R.string.haptics_intensity), fontWeight = FontWeight.Bold) },
+                        secondaryLabel = {
+                            Text(
+                                if (state.intensityPercent == 0) {
+                                    stringResource(R.string.intensity_off)
+                                } else {
+                                    stringResource(R.string.battery_percent, state.intensityPercent)
+                                },
+                            )
+                        },
                     )
                 }
                 item(key = "patterns_title") { SectionLabel(stringResource(R.string.haptics_patterns)) }
@@ -133,14 +131,10 @@ fun HapticTestScreen(
                         }
                     }
                 }
-                item(key = "intensity_title") { SectionLabel(stringResource(R.string.haptics_intensity)) }
-                item(key = "intensity") { IntensityStepper(state, onIntensityChange) }
-                if (!state.hasAmplitudeControl || !state.isVibratorAvailable) {
+                if (!state.isVibratorAvailable) {
                     item(key = "warning") {
                         Text(
-                            text = stringResource(
-                                if (!state.isVibratorAvailable) R.string.haptics_no_vibrator else R.string.haptics_no_amplitude,
-                            ),
+                            text = stringResource(R.string.haptics_no_vibrator),
                             color = VibraColors.OnSurfaceMuted,
                             fontSize = 11.sp,
                             textAlign = TextAlign.Center,
@@ -153,45 +147,73 @@ fun HapticTestScreen(
     }
 }
 
-/** Botón circular grande (como los puños del mockup) que hace sentir un lado. */
 @Composable
-private fun SideButton(
-    label: String,
-    hint: String,
-    action: NavigationAction,
+private fun CommandRow(
+    first: HapticCommand,
+    second: HapticCommand,
+    state: HapticTestUiState,
+    onPlay: (HapticPreset) -> Unit,
+) {
+    Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
+        for (command in listOf(first, second)) {
+            val selected = state.lastPlayed == command.preset
+            CommandTile(
+                command = command,
+                highlighted = selected,
+                playCount = if (selected) state.playCount else 0,
+                onClick = { onPlay(command.preset) },
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+/** Mosaico de comando: icono, nombre y la firma del ritmo; rebota al sentirlo. */
+@Composable
+private fun CommandTile(
+    command: HapticCommand,
     highlighted: Boolean,
     playCount: Int,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val bounce = remember { Animatable(1f) }
     LaunchedEffect(playCount) {
         if (playCount > 0) {
-            bounce.snapTo(0.88f)
+            bounce.snapTo(0.9f)
             bounce.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
         }
     }
-    val ring by animateColorAsState(if (highlighted) VibraColors.Orange else VibraColors.Outline, label = "ring")
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .size(64.dp)
-                .graphicsLayer {
-                    scaleX = bounce.value
-                    scaleY = bounce.value
-                }
-                .clip(CircleShape)
-                .background(ring)
-                .padding(4.dp)
-                .clip(CircleShape)
-                .background(VibraColors.Surface)
-                .clickable(role = Role.Button, onClick = onClick)
-                .semantics { contentDescription = "$label. $hint" },
-        ) {
-            ManeuverIndicator(action = action, eventId = 0L, color = VibraColors.OnSurface, size = 38.dp)
-        }
-        Text(label, color = VibraColors.OnSurface, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-        Text(hint, color = VibraColors.OnSurfaceMuted, fontSize = 10.sp)
+    val border by animateColorAsState(
+        if (highlighted) command.accent else VibraColors.Outline.copy(alpha = 0.6f),
+        label = "commandBorder",
+    )
+    val label = stringResource(command.label)
+    val hint = stringResource(command.hint)
+    val shape = RoundedCornerShape(20.dp)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .graphicsLayer {
+                scaleX = bounce.value
+                scaleY = bounce.value
+            }
+            .clip(shape)
+            .background(VibraGradients.Card)
+            .border(if (highlighted) 2.dp else 1.dp, border, shape)
+            .clickable(role = Role.Button, onClick = onClick)
+            .semantics(mergeDescendants = true) { contentDescription = "$label. $hint" }
+            .padding(vertical = 8.dp, horizontal = 6.dp),
+    ) {
+        ManeuverIndicator(action = command.action, eventId = 0L, color = command.accent, size = 30.dp)
+        Text(label, color = VibraColors.OnSurface, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+        HapticSignature(
+            waveform = command.preset.waveform(),
+            color = command.accent,
+            width = 52.dp,
+            height = 10.dp,
+            modifier = Modifier.padding(top = 3.dp),
+        )
     }
 }
 
@@ -225,60 +247,12 @@ private fun SectionLabel(text: String) {
     )
 }
 
-/** − ●●●○○ + : nivel de intensidad persistente (también afecta a la navegación). */
-@Composable
-private fun IntensityStepper(state: HapticTestUiState, onChange: (Int) -> Unit) {
-    val description = stringResource(R.string.haptics_intensity_cd, state.intensityLevel, state.maxLevel)
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
-        modifier = Modifier
-            .fillMaxWidth()
-            .semantics { contentDescription = description },
-    ) {
-        StepButton("−", enabled = state.intensityLevel > state.minLevel) { onChange(-1) }
-        Row(Modifier.padding(horizontal = 8.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            for (level in state.minLevel..state.maxLevel) {
-                val filled = level <= state.intensityLevel
-                val color by animateColorAsState(if (filled) VibraColors.Orange else VibraColors.SurfaceHigh, label = "lvl")
-                Box(
-                    Modifier
-                        .width(10.dp)
-                        .height((10 + level * 3).dp)
-                        .clip(RoundedCornerShape(3.dp))
-                        .background(color),
-                )
-            }
-        }
-        StepButton("+", enabled = state.intensityLevel < state.maxLevel) { onChange(1) }
-    }
-}
-
-@Composable
-private fun StepButton(symbol: String, enabled: Boolean, onClick: () -> Unit) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .size(40.dp)
-            .clip(CircleShape)
-            .background(if (enabled) VibraColors.SurfaceHigh else VibraColors.Surface)
-            .clickable(enabled = enabled, role = Role.Button, onClick = onClick),
-    ) {
-        Text(
-            symbol,
-            color = if (enabled) VibraColors.OnSurface else VibraColors.Disabled,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-        )
-    }
-}
-
 @WearPreviewDevices
 @Composable
 private fun HapticTestPreview() {
     VibraTheme {
         AppScaffold {
-            HapticTestScreen(HapticTestUiState(intensityLevel = 3, lastPlayed = HapticPreset.RIGHT), {}, {})
+            HapticTestScreen(HapticTestUiState(intensityPercent = 80, lastPlayed = HapticPreset.RIGHT), {}, {})
         }
     }
 }
