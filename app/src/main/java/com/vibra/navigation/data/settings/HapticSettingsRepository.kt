@@ -15,27 +15,34 @@ class HapticSettingsRepository(context: Context) {
 
     private val prefs = context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
-    private val _intensityLevel = MutableStateFlow(
-        prefs.getInt(KEY_INTENSITY, DEFAULT_LEVEL).coerceIn(MIN_LEVEL, MAX_LEVEL),
-    )
+    private val _intensityPercent = MutableStateFlow(readInitialPercent())
 
-    /** Nivel de intensidad de [MIN_LEVEL] a [MAX_LEVEL]. */
-    val intensityLevel: StateFlow<Int> = _intensityLevel.asStateFlow()
+    /** Fuerza del motor de 0 % (apagado) a 100 %. */
+    val intensityPercent: StateFlow<Int> = _intensityPercent.asStateFlow()
 
-    /** Factor de amplitud 0.2–1.0 correspondiente al nivel actual. */
-    val intensityFactor: Float get() = _intensityLevel.value / MAX_LEVEL.toFloat()
+    /** Factor de amplitud 0..1 correspondiente al porcentaje actual. */
+    val intensityFactor: Float get() = _intensityPercent.value / 100f
 
-    fun setIntensityLevel(level: Int) {
-        val clamped = level.coerceIn(MIN_LEVEL, MAX_LEVEL)
-        _intensityLevel.value = clamped
-        prefs.edit { putInt(KEY_INTENSITY, clamped) }
+    fun setIntensityPercent(percent: Int) {
+        val clamped = percent.coerceIn(MIN_PERCENT, MAX_PERCENT)
+        _intensityPercent.value = clamped
+        prefs.edit { putInt(KEY_PERCENT, clamped) }
     }
 
+    /** Migra el antiguo nivel 1–5 (20 % por nivel) si aún no hay porcentaje guardado. */
+    private fun readInitialPercent(): Int = when {
+        prefs.contains(KEY_PERCENT) -> prefs.getInt(KEY_PERCENT, DEFAULT_PERCENT)
+        prefs.contains(LEGACY_KEY_LEVEL) -> prefs.getInt(LEGACY_KEY_LEVEL, 5) * 20
+        else -> DEFAULT_PERCENT
+    }.coerceIn(MIN_PERCENT, MAX_PERCENT)
+
     companion object {
-        const val MIN_LEVEL = 1
-        const val MAX_LEVEL = 5
-        const val DEFAULT_LEVEL = 5
+        const val MIN_PERCENT = 0
+        const val MAX_PERCENT = 100
+        const val STEP_PERCENT = 10
+        const val DEFAULT_PERCENT = 100
         private const val PREFS = "vibra_haptics"
-        private const val KEY_INTENSITY = "intensity_level"
+        private const val KEY_PERCENT = "intensity_percent"
+        private const val LEGACY_KEY_LEVEL = "intensity_level"
     }
 }
