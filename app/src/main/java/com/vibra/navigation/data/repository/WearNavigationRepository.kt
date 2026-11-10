@@ -82,6 +82,13 @@ class WearNavigationRepository(
     private val _guidancePaused = MutableStateFlow(false)
     override val guidancePaused: StateFlow<Boolean> = _guidancePaused.asStateFlow()
 
+    /**
+     * True mientras el enlace es el puente ADB de depuración. Entonces la ruta llega por
+     * el puente (que la reenvía al conectar) y NO se lee la Data Layer: en un emulador
+     * puede guardar un DataItem viejo de otro emparejamiento que pisaría la ruta real.
+     */
+    @Volatile private var viaBridge = false
+
     /** Última acción con estado que no se pudo entregar. */
     @Volatile private var pendingAction: UserActionType? = null
 
@@ -204,6 +211,7 @@ class WearNavigationRepository(
     }
 
     private suspend fun loadActiveRoute() {
+        if (viaBridge) return
         runCatchingWear {
             // Sin host en la URI: DataItems de cualquier nodo emparejado.
             val uri = Uri.Builder()
@@ -234,7 +242,8 @@ class WearNavigationRepository(
         }
 
         // Emulador sin emparejamiento de Play services: el puente ADB cuenta como conexión.
-        if (result.getOrNull() == null && devBridge?.connected?.value == true) {
+        viaBridge = result.getOrNull() == null && devBridge?.connected?.value == true
+        if (viaBridge) {
             updateConnection(ConnectionStatus.Connected(LocalDevBridgeClient.NODE_NAME, isNearby = true))
             return null
         }
