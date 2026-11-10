@@ -7,7 +7,10 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,6 +33,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -45,8 +54,9 @@ import androidx.wear.compose.material3.Text
 import com.vibra.navigation.R
 import com.vibra.navigation.data.model.ConnectionStatus
 import com.vibra.navigation.presentation.theme.VibraColors
+import com.vibra.navigation.presentation.theme.VibraGradients
 
-/** Fondo negro puro (OLED) para todas las pantallas. */
+/** Fondo de marca constante para todas las pantallas: marfil pastel liso. */
 @Composable
 fun VibraBackground(content: @Composable BoxScope.() -> Unit) {
     Box(
@@ -57,38 +67,97 @@ fun VibraBackground(content: @Composable BoxScope.() -> Unit) {
     )
 }
 
-/** Tarjeta pizarra redondeada: agrupa información secundaria sin encender el panel. */
+/**
+ * Ondas de vibración del logo: arcos azules a la izquierda y naranjas a la
+ * derecha que se expanden y se desvanecen. [startFraction] es el radio inicial
+ * relativo al lienzo (0.5 = borde). Con [animated] = false quedan fijas.
+ */
+@Composable
+fun BrandWaves(
+    modifier: Modifier = Modifier,
+    waves: Int = 3,
+    startFraction: Float = 0.30f,
+    travelFraction: Float = 0.18f,
+    strokeWidth: Dp = 4.dp,
+    sweep: Float = 70f,
+    periodMillis: Int = 1_400,
+    maxAlpha: Float = 0.9f,
+    animated: Boolean = true,
+) {
+    val progress = if (animated) {
+        rememberInfiniteTransition(label = "brandWaves").animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(tween(periodMillis, easing = LinearEasing), RepeatMode.Restart),
+            label = "brandWave",
+        ).value
+    } else {
+        0f
+    }
+    Canvas(modifier) {
+        val stroke = Stroke(width = strokeWidth.toPx(), cap = StrokeCap.Round)
+        for (i in 0 until waves) {
+            val t = if (animated) (progress + i.toFloat() / waves) % 1f else i.toFloat() / waves
+            val radius = size.minDimension * (startFraction + travelFraction * t)
+            // Aparecen rápido y se apagan al alejarse.
+            val alpha = maxAlpha * (if (t < 0.15f) t / 0.15f else 1f - (t - 0.15f) / 0.85f)
+            val topLeft = Offset(center.x - radius, center.y - radius)
+            val arc = Size(radius * 2, radius * 2)
+            drawArc(VibraColors.Blue.copy(alpha = alpha), 180f - sweep / 2, sweep, false, topLeft, arc, style = stroke)
+            drawArc(VibraColors.Orange.copy(alpha = alpha), -sweep / 2, sweep, false, topLeft, arc, style = stroke)
+        }
+    }
+}
+
+/** Tarjeta marina con degradado y borde fino: agrupa información secundaria. */
 @Composable
 fun SurfaceCard(
     modifier: Modifier = Modifier,
     cornerRadius: Dp = 22.dp,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    val shape = RoundedCornerShape(cornerRadius)
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(VibraColors.Surface, RoundedCornerShape(cornerRadius))
+            .clip(shape)
+            .background(VibraGradients.Card)
+            .border(1.dp, VibraColors.Outline.copy(alpha = 0.6f), shape)
             .padding(horizontal = 14.dp, vertical = 10.dp),
         content = content,
     )
 }
 
 /**
- * Logo de Vibra sobre una insignia clara: el logo tiene trazos marino oscuro que
- * desaparecerían directamente sobre negro.
+ * Logo de Vibra sobre una insignia crema: el logo tiene trazos marino que se
+ * perderían sobre el fondo de marca. Con [ring] lleva un aro azul → naranja.
  */
 @Composable
-fun VibraLogoBadge(modifier: Modifier = Modifier, size: Dp = 30.dp) {
+fun VibraLogoBadge(
+    modifier: Modifier = Modifier,
+    size: Dp = 30.dp,
+    ring: Boolean = false,
+    fill: Color = Color.White,
+) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .size(size)
-            .background(VibraColors.OnSurface, CircleShape),
+            .then(
+                if (ring) {
+                    Modifier
+                        .background(VibraGradients.BrandSweep, CircleShape)
+                        .padding(size * 0.04f)
+                } else {
+                    Modifier
+                },
+            )
+            .background(fill, CircleShape),
     ) {
         Image(
             painter = painterResource(R.drawable.vibra_logo),
             contentDescription = null,
-            modifier = Modifier.size(size * 0.78f),
+            modifier = Modifier.size(size * 0.74f),
         )
     }
 }
@@ -153,7 +222,7 @@ fun ConnectionIndicator(connection: ConnectionStatus, modifier: Modifier = Modif
     val dotColor by animateColorAsState(
         when (connection) {
             is ConnectionStatus.Connected -> VibraColors.Emerald
-            ConnectionStatus.Unknown -> VibraColors.Orange
+            ConnectionStatus.Unknown -> VibraColors.OrangeText
             else -> VibraColors.DangerText
         },
         label = "connectionDot",
@@ -191,7 +260,7 @@ fun ConnectionIndicator(connection: ConnectionStatus, modifier: Modifier = Modif
 fun ProgressBar(
     fraction: Float,
     modifier: Modifier = Modifier,
-    color: Color = VibraColors.Orange,
+    brush: Brush = VibraGradients.Brand,
     track: Color = VibraColors.SurfaceHigh,
     height: Dp = 6.dp,
 ) {
@@ -207,14 +276,14 @@ fun ProgressBar(
                 Modifier
                     .fillMaxHeight()
                     .fillMaxWidth(animated)
-                    .background(color, RoundedCornerShape(50)),
+                    .background(brush, RoundedCornerShape(50)),
             )
         }
     }
 }
 
 object VibraButtons {
-    /** Acción principal: naranja con texto negro (≈ 7:1). */
+    /** Acción principal: naranja con texto marino (≈ 7:1). */
     @Composable
     fun primary(): ButtonColors = ButtonDefaults.buttonColors(
         containerColor = VibraColors.Orange,
@@ -223,7 +292,18 @@ object VibraButtons {
         disabledContentColor = VibraColors.Disabled,
     )
 
-    /** Acción secundaria: pizarra con texto claro. */
+    /** Acción de marca: azul del logo con texto blanco. */
+    @Composable
+    fun brand(): ButtonColors = ButtonDefaults.buttonColors(
+        containerColor = VibraColors.Blue,
+        contentColor = Color.White,
+        secondaryContentColor = Color.White.copy(alpha = 0.85f),
+        iconColor = Color.White,
+        disabledContainerColor = VibraColors.Surface,
+        disabledContentColor = VibraColors.Disabled,
+    )
+
+    /** Acción secundaria: arena clara con texto marino. */
     @Composable
     fun secondary(): ButtonColors = ButtonDefaults.buttonColors(
         containerColor = VibraColors.SurfaceHigh,
