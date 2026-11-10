@@ -214,7 +214,8 @@ private fun ManeuverPanel(maneuver: ManeuverUi?, isPaused: Boolean) {
             transitionSpec = { (fadeIn() + scaleIn(initialScale = 0.7f)) togetherWith fadeOut() },
             label = "distance",
         ) { meters ->
-            if (meters != null) {
+            // Sin distancia (llegada, "da la vuelta" en vivo): no se muestra "0 m".
+            if (meters != null && meters > 0) {
                 Text(
                     text = formatDistance(meters.toDouble()),
                     color = if (isPaused) VibraColors.OnSurfaceMuted else VibraColors.OrangeText,
