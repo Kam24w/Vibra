@@ -37,19 +37,18 @@ class VibrationManager(
     val hasAmplitudeControl: Boolean get() = vibrator?.hasAmplitudeControl() == true
 
     fun vibrate(event: NavigationEvent) {
-        val waveform = event.vibrationPattern?.let(HapticWaveform::from)
-            ?: HapticWaveform.defaultFor(event.action)
-        vibrate(waveform)
+        vibrate(HapticWaveform.forEvent(event), fullStrength = HapticWaveform.ignoresUserIntensity(event.action))
     }
 
     fun vibrate(preset: HapticPreset) = vibrate(preset.waveform())
 
-    fun vibrate(waveform: HapticWaveform) {
+    /** [fullStrength] ignora la intensidad del usuario (alertas). */
+    fun vibrate(waveform: HapticWaveform, fullStrength: Boolean = false) {
         val vibrator = vibrator?.takeIf { it.hasVibrator() } ?: run {
             Log.w(TAG, "Dispositivo sin vibrador")
             return
         }
-        val factor = intensity()
+        val factor = if (fullStrength) 1f else intensity()
         if (factor <= 0f) {
             // Intensidad al 0 %: el usuario apagó el motor desde el ajuste.
             vibrator.cancel()

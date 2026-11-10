@@ -1,6 +1,7 @@
 package com.vibra.navigation.haptics
 
 import com.vibra.navigation.data.model.NavigationAction
+import com.vibra.navigation.data.model.NavigationEvent
 import com.vibra.navigation.data.model.VibrationPattern
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -111,5 +112,32 @@ class HapticWaveformTest {
         val wave = HapticWaveform.uTurn()
         assertEquals(6, wave.amplitudes.count { it > 0 })
         assertTrue(wave.amplitudes.filter { it > 0 }.all { it == 255 })
+    }
+
+    @Test
+    fun `signature commands keep the watch rhythm even if the phone sends a pattern`() {
+        val phonePattern = VibrationPattern(pulses = 2, durationMs = 120, amplitude = 170)
+        listOf(
+            NavigationAction.TURN_LEFT,
+            NavigationAction.TURN_RIGHT,
+            NavigationAction.STRAIGHT,
+            NavigationAction.U_TURN,
+        ).forEach { action ->
+            val event = NavigationEvent(action = action, vibrationPattern = phonePattern, timestamp = 1L)
+            assertEquals(action.name, HapticWaveform.defaultFor(action), HapticWaveform.forEvent(event))
+        }
+    }
+
+    @Test
+    fun `other actions use the phone pattern when present`() {
+        val phonePattern = VibrationPattern(pulses = 4, durationMs = 150, amplitude = 200)
+        val event = NavigationEvent(action = NavigationAction.ARRIVED, vibrationPattern = phonePattern, timestamp = 1L)
+        assertEquals(HapticWaveform.from(phonePattern), HapticWaveform.forEvent(event))
+    }
+
+    @Test
+    fun `only alerts ignore the user intensity`() {
+        assertTrue(HapticWaveform.ignoresUserIntensity(NavigationAction.ALERT))
+        assertTrue(NavigationAction.entries.filter { it != NavigationAction.ALERT }.none(HapticWaveform::ignoresUserIntensity))
     }
 }

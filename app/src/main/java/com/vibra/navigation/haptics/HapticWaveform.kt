@@ -1,6 +1,7 @@
 package com.vibra.navigation.haptics
 
 import com.vibra.navigation.data.model.NavigationAction
+import com.vibra.navigation.data.model.NavigationEvent
 import com.vibra.navigation.data.model.VibrationPattern
 import kotlin.math.roundToInt
 
@@ -107,6 +108,29 @@ data class HapticWaveform(
             timings = longArrayOf(0, 60, 60, 60, 60, 60, 300, 60, 60, 60, 60, 60),
             amplitudes = intArrayOf(0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255),
         )
+
+        /** Comandos con ritmo propio del reloj (los que se aprenden en el test háptico). */
+        private val SIGNATURE_ACTIONS = setOf(
+            NavigationAction.TURN_LEFT,
+            NavigationAction.TURN_RIGHT,
+            NavigationAction.STRAIGHT,
+            NavigationAction.U_TURN,
+        )
+
+        /**
+         * Onda para un evento recibido del teléfono. Los cuatro comandos principales
+         * usan siempre el ritmo distintivo del reloj (el mismo del test háptico), aunque
+         * WanderAI envíe `vibration_pattern`; el resto usa el patrón del teléfono si viene.
+         */
+        fun forEvent(event: NavigationEvent): HapticWaveform =
+            if (event.action in SIGNATURE_ACTIONS) {
+                defaultFor(event.action)
+            } else {
+                event.vibrationPattern?.let(::from) ?: defaultFor(event.action)
+            }
+
+        /** Las alertas ignoran la intensidad del usuario (incluso 0 %) para no perderse nunca. */
+        fun ignoresUserIntensity(action: NavigationAction): Boolean = action == NavigationAction.ALERT
 
         /** Onda: la amplitud sube y baja de forma progresiva. */
         fun wave(steps: Int = 8, stepMs: Long = 60L): HapticWaveform {
