@@ -2,100 +2,92 @@ package com.vibra.navigation.presentation.splash
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.wear.compose.material3.AppScaffold
+import androidx.wear.compose.material3.ButtonDefaults
+import androidx.wear.compose.material3.EdgeButton
+import androidx.wear.compose.material3.EdgeButtonSize
 import androidx.wear.compose.material3.Text
+import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
 import com.vibra.navigation.R
-import com.vibra.navigation.presentation.theme.VibraColors
+import com.vibra.navigation.presentation.components.BrandWaves
+import com.vibra.navigation.presentation.components.VibraBackground
 import com.vibra.navigation.presentation.components.VibraLogoBadge
+import com.vibra.navigation.presentation.theme.VibraColors
+import com.vibra.navigation.presentation.theme.VibraTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * Splash animado de marca. Continúa al splash del sistema (mismo logo sobre negro):
- * el logo "aterriza" con un rebote, ondas de vibración se expanden a sus lados y
- * aparece la palabra Vibra. Dura [SPLASH_DURATION_MS] y luego llama a [onFinished].
+ * Pantalla 2: presentación de marca sobre marfil pastel. Continúa al splash del
+ * sistema (pantalla 1, mismo logo sobre marfil): el logo "aterriza" con un rebote,
+ * las ondas azul/naranja se expanden a sus lados, aparecen "Vibra" y el lema en
+ * azul marino y, al final, el botón naranja "Comenzar rumbo" abajo del todo.
  */
 @Composable
-fun SplashScreen(onFinished: () -> Unit) {
-    val finish by rememberUpdatedState(onFinished)
+fun SplashScreen(onStart: () -> Unit) {
     val logoScale = remember { Animatable(0.7f) }
     val wordAlpha = remember { Animatable(0f) }
     val wordOffset = remember { Animatable(12f) }
+    val buttonAlpha = remember { Animatable(0f) }
 
     LaunchedEffect(Unit) {
         launch { logoScale.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)) }
         delay(350)
         launch { wordAlpha.animateTo(1f, tween(450)) }
         launch { wordOffset.animateTo(0f, tween(450, easing = FastOutSlowInEasing)) }
-        delay(SPLASH_DURATION_MS - 350)
-        finish()
+        delay(450)
+        buttonAlpha.animateTo(1f, tween(350))
     }
 
     val appName = stringResource(R.string.app_name)
-    val waves = rememberInfiniteTransition(label = "waves")
-    val wave by waves.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(1_100, easing = LinearEasing), RepeatMode.Restart),
-        label = "wave",
-    )
 
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .fillMaxSize()
-            .background(VibraColors.Background),
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(150.dp)) {
-                // Ondas de vibración que se expanden hacia los lados.
-                Canvas(Modifier.size(150.dp)) {
-                    for (i in 0 until 2) {
-                        val t = (wave + i * 0.5f) % 1f
-                        val radius = size.minDimension * (0.30f + 0.20f * t)
-                        val alpha = (1f - t) * 0.8f
-                        val topLeft = Offset(center.x - radius, center.y - radius)
-                        val arcSize = Size(radius * 2, radius * 2)
-                        val stroke = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round)
-                        drawArc(VibraColors.Orange.copy(alpha = alpha), 140f, 80f, false, topLeft, arcSize, style = stroke)
-                        drawArc(VibraColors.Emerald.copy(alpha = alpha), -40f, 80f, false, topLeft, arcSize, style = stroke)
-                    }
-                }
-                // Insignia clara: el logo tiene trazos marino que no se verían sobre negro.
+    VibraBackground {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 22.dp),
+        ) {
+            // Las ondas solo ocupan los lados: el lienzo de 156 dp desborda en vertical
+            // una caja más baja, así el texto queda cerca sin tocar la animación.
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(width = 156.dp, height = 98.dp)) {
+                // Ondas del logo: azul a la izquierda, naranja a la derecha.
+                BrandWaves(
+                    modifier = Modifier.requiredSize(156.dp),
+                    waves = 3,
+                    startFraction = 0.32f,
+                    travelFraction = 0.17f,
+                    strokeWidth = 5.dp,
+                    sweep = 76f,
+                    periodMillis = 1_300,
+                )
+                // Insignia blanca con aro de marca: destaca sobre el marfil.
                 VibraLogoBadge(
-                    size = 88.dp,
+                    size = 90.dp,
+                    ring = true,
+                    fill = Color.White,
                     modifier = Modifier
                         .graphicsLayer {
                             scaleX = logoScale.value
@@ -105,9 +97,9 @@ fun SplashScreen(onFinished: () -> Unit) {
                 )
             }
             Text(
-                text = stringResource(R.string.app_name),
-                color = VibraColors.OnSurface,
-                fontSize = 28.sp,
+                text = appName,
+                color = VibraColors.NavyInk,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.ExtraBold,
                 modifier = Modifier.graphicsLayer {
                     alpha = wordAlpha.value
@@ -116,14 +108,39 @@ fun SplashScreen(onFinished: () -> Unit) {
             )
             Text(
                 text = stringResource(R.string.splash_tagline),
-                color = VibraColors.OnSurfaceMuted,
+                color = VibraColors.NavyInk,
                 fontSize = 12.sp,
-                modifier = Modifier
-                    .padding(top = 2.dp)
-                    .graphicsLayer { alpha = wordAlpha.value },
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.graphicsLayer { alpha = wordAlpha.value },
+            )
+        }
+        EdgeButton(
+            onClick = onStart,
+            buttonSize = EdgeButtonSize.Small,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = VibraColors.Orange,
+                contentColor = VibraColors.NavyInk,
+            ),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .graphicsLayer { alpha = buttonAlpha.value },
+        ) {
+            Text(
+                stringResource(R.string.splash_start),
+                fontSize = 13.sp,
+                lineHeight = 14.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
             )
         }
     }
 }
 
-private const val SPLASH_DURATION_MS = 1_600L
+@WearPreviewDevices
+@Composable
+private fun SplashPreview() {
+    VibraTheme {
+        AppScaffold { SplashScreen(onStart = {}) }
+    }
+}
