@@ -6,6 +6,7 @@ import com.vibra.navigation.BuildConfig
 import com.vibra.navigation.data.model.ActiveRoute
 import com.vibra.navigation.data.repository.parseDistanceMeters
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -76,27 +77,38 @@ class LocalDevBridgeClient(
         }
     }
 
-    private suspend fun connectAndRead(handler: FrameHandler) {
+    private suspend fun connectAndRead(handler: FrameHandler) = coroutineScope {
         val s = Socket()
+        var pinger: Job? = null
         try {
             s.connect(InetSocketAddress(host, port), CONNECT_TIMEOUT_MS)
             s.tcpNoDelay = true
+            // Latido: sin datos (ni PING) del teléfono en READ_TIMEOUT_MS, el enlace está muerto.
+            s.soTimeout = READ_TIMEOUT_MS
             writeMutex.withLock {
                 socket = s
                 output = DataOutputStream(BufferedOutputStream(s.getOutputStream()))
             }
             _connected.value = true
             Log.i(TAG, "Conectado a WanderAI por el puente local $host:$port")
+            pinger = launch(Dispatchers.IO) {
+                while (isActive) {
+                    delay(PING_INTERVAL_MS)
+                    if (!send(PATH_PING, ByteArray(0))) break
+                }
+            }
             val input = DataInputStream(BufferedInputStream(s.getInputStream()))
             while (true) {
                 val path = input.readUTF()
                 val size = input.readInt()
                 if (size !in 0..MAX_FRAME_BYTES) throw IOException("Frame inválido: $size bytes")
                 val data = ByteArray(size).also { input.readFully(it) }
+                if (path == PATH_PING) continue
                 runCatching { handler.onFrame(path, data) }
                     .onFailure { Log.w(TAG, "Error procesando frame $path", it) }
             }
         } finally {
+            pinger?.cancel()
             writeMutex.withLock {
                 if (socket === s) {
                     socket = null
@@ -128,6 +140,10 @@ class LocalDevBridgeClient(
     companion object {
         const val HOST = "10.0.2.2"
         const val PORT = 5650
+        /** Latido en ambos sentidos (igual que `LocalDevBridge.PATH_PING` del teléfono). */
+        const val PATH_PING = "/bridge/ping"
+        private const val PING_INTERVAL_MS = 3_000L
+        private const val READ_TIMEOUT_MS = 10_000
         const val NODE_NAME = "WanderAI (puente ADB)"
         private const val TAG = "VibraDevBridge"
         // Windows tarda ~2 s en rechazar un puerto cerrado en loopback: con 2 s el
