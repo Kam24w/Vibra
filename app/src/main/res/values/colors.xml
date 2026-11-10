@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Paleta de Vibra. Ver presentation/theme/Theme.kt. -->
 <resources>
-    <color name="vibra_black">#FF000000</color>
+    <!-- Marfil pastel: fondo del splash del sistema y de la presentación. -->
+    <color name="vibra_ivory">#FFF4F1EA</color>
     <color name="vibra_cream">#FFF4EEE2</color>
 </resources>
