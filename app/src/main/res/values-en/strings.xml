@@ -30,4 +30,33 @@
     <string name="home_route_active">Active route</string>
     <string name="home_open_haptics">Haptic test</string>
     <string name="home_start_hint">Start a route in WanderAI</string>
+
+    <!-- Haptic navigation -->
+    <string name="waiting_title">No active route</string>
+    <string name="waiting_body">Start a route in WanderAI on your phone</string>
+    <string name="waiting_instruction">Waiting for directions…</string>
+    <string name="remaining_label">Remaining: %1$s</string>
+    <string name="guidance_paused_banner">Guidance paused</string>
+    <string name="route_progress_cd">Route progress: %1$d%%</string>
+    <string name="alert_title">Alert</string>
+    <string name="alert_body_default">Check your route on the phone</string>
+    <string name="action_repeat">Repeat direction</string>
+    <string name="action_pause">Pause guidance</string>
+    <string name="action_resume">Resume guidance</string>
+    <string name="action_stop">Stop route</string>
+    <string name="error_send_failed">Could not reach the phone</string>
+    <string name="error_send_queued">No link: it will be sent on reconnect</string>
+
+    <!-- Maneuver accessibility -->
+    <string name="cd_maneuver">Maneuver: %1$s</string>
+    <string name="maneuver_turn_left">turn left</string>
+    <string name="maneuver_turn_right">turn right</string>
+    <string name="maneuver_slight_left">bear left</string>
+    <string name="maneuver_slight_right">bear right</string>
+    <string name="maneuver_straight">go straight</string>
+    <string name="maneuver_u_turn">turn around</string>
+    <string name="maneuver_arrived">you have arrived</string>
+    <string name="maneuver_rerouting">rerouting</string>
+    <string name="maneuver_alert">alert, check your phone</string>
+    <string name="maneuver_unknown">direction</string>
 </resources>
