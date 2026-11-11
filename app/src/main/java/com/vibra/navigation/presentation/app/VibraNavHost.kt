@@ -11,6 +11,7 @@ import com.vibra.navigation.presentation.theme.VibraColors
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
+import com.vibra.navigation.presentation.diagnostics.DiagnosticsRoute
 import com.vibra.navigation.presentation.guidance.GuidanceRoute
 import com.vibra.navigation.presentation.haptics.HapticTestRoute
 import com.vibra.navigation.presentation.haptics.IntensityRoute
@@ -26,6 +27,7 @@ object VibraDestinations {
     const val GUIDANCE = "guidance"
     const val HAPTICS = "haptics"
     const val INTENSITY = "intensity"
+    const val DIAGNOSTICS = "diagnostics"
 }
 
 /**
@@ -89,6 +91,7 @@ fun VibraApp() {
                     )
                 }
                 composable(VibraDestinations.INTENSITY) { IntensityRoute() }
+                composable(VibraDestinations.DIAGNOSTICS) { DiagnosticsRoute() }
             }
         }
     }
