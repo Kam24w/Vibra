@@ -7,6 +7,7 @@ import com.vibra.navigation.data.device.DeviceInfoReader
 import com.vibra.navigation.data.model.ConnectionStatus
 import com.vibra.navigation.data.model.transport
 import com.vibra.navigation.data.repository.NavigationRepository
+import com.vibra.navigation.data.settings.HapticSettings
 import com.vibra.navigation.data.settings.HapticSettingsRepository
 import com.vibra.navigation.haptics.HapticWaveform
 import com.vibra.navigation.haptics.HapticPlayer
@@ -24,7 +25,7 @@ import kotlinx.coroutines.launch
  */
 class DiagnosticsViewModel(
     private val repository: NavigationRepository,
-    private val settings: HapticSettingsRepository,
+    private val settings: HapticSettings,
     private val vibrationManager: HapticPlayer,
     private val deviceInfoReader: DeviceInfoReader,
 ) : ViewModel() {

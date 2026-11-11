@@ -11,19 +11,17 @@ import kotlinx.coroutines.flow.asStateFlow
  * lectura síncrona barata) para que el WearableListenerService pueda aplicar la
  * intensidad sin esperar a corrutinas.
  */
-class HapticSettingsRepository(context: Context) {
+class HapticSettingsRepository(context: Context) : HapticSettings {
 
     private val prefs = context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
     private val _intensityPercent = MutableStateFlow(readInitialPercent())
 
-    /** Fuerza del motor de 0 % (apagado) a 100 %. */
-    val intensityPercent: StateFlow<Int> = _intensityPercent.asStateFlow()
+    override val intensityPercent: StateFlow<Int> = _intensityPercent.asStateFlow()
 
-    /** Factor de amplitud 0..1 correspondiente al porcentaje actual. */
-    val intensityFactor: Float get() = _intensityPercent.value / 100f
+    override val intensityFactor: Float get() = _intensityPercent.value / 100f
 
-    fun setIntensityPercent(percent: Int) {
+    override fun setIntensityPercent(percent: Int) {
         val clamped = percent.coerceIn(MIN_PERCENT, MAX_PERCENT)
         _intensityPercent.value = clamped
         prefs.edit { putInt(KEY_PERCENT, clamped) }

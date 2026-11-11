@@ -2,6 +2,7 @@ package com.vibra.navigation.presentation.haptics
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.vibra.navigation.data.settings.HapticSettings
 import com.vibra.navigation.data.settings.HapticSettingsRepository
 import com.vibra.navigation.haptics.HapticPreset
 import com.vibra.navigation.haptics.HapticPlayer
@@ -26,7 +27,7 @@ private data class Playback(val preset: HapticPreset? = null, val count: Int = 0
 
 /** Compartido por el test háptico (pantalla 4) y el ajuste de intensidad (pantalla 5). */
 class HapticTestViewModel(
-    private val settings: HapticSettingsRepository,
+    private val settings: HapticSettings,
     private val vibrationManager: HapticPlayer,
 ) : ViewModel() {
 
