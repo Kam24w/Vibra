@@ -33,6 +33,7 @@ import androidx.wear.compose.material3.Button
 import androidx.wear.compose.material3.ScreenScaffold
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
+import androidx.wear.compose.ui.tooling.preview.WearPreviewFontScales
 import com.vibra.navigation.R
 import com.vibra.navigation.data.device.DeviceInfo
 import com.vibra.navigation.data.model.LinkTransport
@@ -220,6 +221,7 @@ private fun DiagnosticIssue.messageRes(): Int = when (this) {
 private fun NavigationAction.shortName(): String = name
 
 @WearPreviewDevices
+@WearPreviewFontScales
 @Composable
 private fun DiagnosticsPreview() {
     VibraTheme {
