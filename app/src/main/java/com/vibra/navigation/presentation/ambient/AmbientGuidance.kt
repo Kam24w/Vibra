@@ -15,7 +15,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.wear.compose.foundation.CurvedTextStyle
 import androidx.wear.compose.material3.Text
+import androidx.wear.compose.material3.TimeText
+import androidx.wear.compose.material3.timeTextCurvedText
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
 import com.vibra.navigation.R
 import com.vibra.navigation.data.model.ActiveRoute
@@ -38,6 +41,10 @@ fun AmbientGuidance(state: GuidanceUiState) {
             .fillMaxSize()
             .background(Color.Black),
     ) {
+        // La hora sigue visible en ambiente, en gris y sin fondo.
+        TimeText(backgroundColor = Color.Transparent, modifier = Modifier.align(Alignment.TopCenter)) { time ->
+            timeTextCurvedText(time, CurvedTextStyle(color = AMBIENT_TEXT))
+        }
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(horizontal = 24.dp)) {
             val maneuver = state.maneuver
             if (maneuver != null) {
