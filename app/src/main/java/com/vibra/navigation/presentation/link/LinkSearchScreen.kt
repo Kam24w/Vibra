@@ -50,6 +50,7 @@ import androidx.wear.compose.material3.EdgeButtonSize
 import androidx.wear.compose.material3.Icon
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
+import androidx.wear.compose.ui.tooling.preview.WearPreviewFontScales
 import com.vibra.navigation.R
 import com.vibra.navigation.data.model.ConnectionStatus
 import com.vibra.navigation.data.repository.NavigationRepository
@@ -241,6 +242,7 @@ private fun Radar(active: Boolean, modifier: Modifier = Modifier) {
 private const val LINKED_HOLD_MS = 1_100L
 
 @WearPreviewDevices
+@WearPreviewFontScales
 @Composable
 private fun LinkSearchPreview() {
     VibraTheme {
