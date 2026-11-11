@@ -32,6 +32,7 @@ import androidx.wear.compose.material3.Slider
 import androidx.wear.compose.material3.SliderDefaults
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
+import androidx.wear.compose.ui.tooling.preview.WearPreviewFontScales
 import com.vibra.navigation.R
 import com.vibra.navigation.data.settings.HapticSettingsRepository
 import com.vibra.navigation.haptics.HapticPreset
@@ -153,6 +154,7 @@ fun IntensityScreen(state: HapticTestUiState, onChange: (Int) -> Unit, onTry: ()
 }
 
 @WearPreviewDevices
+@WearPreviewFontScales
 @Composable
 private fun IntensityPreview() {
     VibraTheme {
