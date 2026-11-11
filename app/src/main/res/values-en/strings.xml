@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">Vibra</string>
+    <string name="splash_tagline">Haptic navigation</string>
+    <string name="splash_start">Start Route</string>
+
+    <!-- Phone search -->
+    <string name="link_searching">Looking for your phone…</string>
+    <string name="link_found">Phone found</string>
+    <string name="link_hint">Open WanderAI on your phone</string>
+    <string name="link_skip">Skip</string>
+
+    <!-- Connection -->
+    <string name="status_connected">Connected</string>
+    <string name="status_disconnected">Disconnected</string>
+    <string name="status_searching">Pairing…</string>
+    <string name="status_unavailable">Data Layer unavailable</string>
+
+    <!-- Sync and battery -->
+    <string name="sync_title">Synced</string>
+    <string name="sync_never">no data yet</string>
+    <string name="sync_now">now</string>
+    <string name="sync_seconds">%1$d s ago</string>
+    <string name="sync_minutes">%1$d min ago</string>
+    <string name="battery_label">Haptic battery</string>
+    <string name="battery_short">Battery</string>
+
+    <!-- Home -->
+    <string name="home_open_guidance">Navigation</string>
+    <string name="home_no_route">No active route</string>
+    <string name="home_route_active">Active route</string>
+    <string name="home_open_haptics">Haptic test</string>
+    <string name="home_start_hint">Start a route in WanderAI</string>
+</resources>
