@@ -1,5 +1,6 @@
 package com.vibra.navigation.presentation
 
+import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.content.Context
@@ -32,7 +33,7 @@ class MainActivity : ComponentActivity() {
                 guidanceRequests = guidanceRequests.intValue,
             )
         }
-        requestLocalNetworkForDevBridge()
+        requestRuntimePermissions()
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -43,14 +44,17 @@ class MainActivity : ComponentActivity() {
     private fun Intent.wantsGuidance() = getBooleanExtra(EXTRA_OPEN_GUIDANCE, false)
 
     /**
-     * Solo debug + emulador: desde Android 17 el socket del puente a 10.0.2.2 necesita
-     * ACCESS_LOCAL_NETWORK (declarado solo en `src/debug`). En un reloj físico o en
-     * release no se pide nada.
+     * Pide de una vez los permisos que falten:
+     *  - POST_NOTIFICATIONS (Wear OS 4+, API 33): la ruta activa en la esfera.
+     *  - ACCESS_LOCAL_NETWORK, solo debug + emulador: desde Android 17 el socket del
+     *    puente a 10.0.2.2 lo necesita (declarado solo en `src/debug`).
      */
-    private fun requestLocalNetworkForDevBridge() {
-        if (!DevEnvironment.localBridgeEnabled || Build.VERSION.SDK_INT < 37) return
-        if (checkSelfPermission(PERMISSION_LOCAL_NETWORK) == PackageManager.PERMISSION_GRANTED) return
-        requestPermissions(arrayOf(PERMISSION_LOCAL_NETWORK), 0)
+    private fun requestRuntimePermissions() {
+        val missing = buildList {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) add(Manifest.permission.POST_NOTIFICATIONS)
+            if (DevEnvironment.localBridgeEnabled && Build.VERSION.SDK_INT >= 37) add(PERMISSION_LOCAL_NETWORK)
+        }.filter { checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }
+        if (missing.isNotEmpty()) requestPermissions(missing.toTypedArray(), 0)
     }
 
     companion object {
