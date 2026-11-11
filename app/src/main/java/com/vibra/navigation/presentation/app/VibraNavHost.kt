@@ -80,6 +80,9 @@ fun VibraApp() {
                         onOpenHaptics = {
                             navController.navigate(VibraDestinations.HAPTICS) { launchSingleTop = true }
                         },
+                        onOpenDiagnostics = {
+                            navController.navigate(VibraDestinations.DIAGNOSTICS) { launchSingleTop = true }
+                        },
                     )
                 }
                 composable(VibraDestinations.GUIDANCE) { GuidanceRoute() }

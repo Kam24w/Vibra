@@ -67,6 +67,7 @@ import com.vibra.navigation.presentation.theme.VibraTheme
 fun HomeRoute(
     onOpenGuidance: () -> Unit,
     onOpenHaptics: () -> Unit,
+    onOpenDiagnostics: () -> Unit = {},
     viewModel: HomeViewModel = viewModel(factory = HomeViewModel.Factory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -84,7 +85,12 @@ fun HomeRoute(
         lastRouteActive = state.route.routeActive
     }
 
-    HomeScreen(state = state, onOpenGuidance = onOpenGuidance, onOpenHaptics = onOpenHaptics)
+    HomeScreen(
+        state = state,
+        onOpenGuidance = onOpenGuidance,
+        onOpenHaptics = onOpenHaptics,
+        onOpenDiagnostics = onOpenDiagnostics,
+    )
 }
 
 /**
@@ -98,6 +104,7 @@ fun HomeScreen(
     state: HomeUiState,
     onOpenGuidance: () -> Unit,
     onOpenHaptics: () -> Unit,
+    onOpenDiagnostics: () -> Unit = {},
 ) {
     // Ítem 1 = núcleo de navegación: lo primero que se ve centrado.
     val listState = rememberScalingLazyListState(initialCenterItemIndex = 1)
@@ -131,6 +138,21 @@ fun HomeScreen(
                             )
                         },
                         label = { Text(stringResource(R.string.home_open_haptics), fontWeight = FontWeight.Bold) },
+                    )
+                }
+                item(key = "diagnostics") {
+                    Button(
+                        onClick = onOpenDiagnostics,
+                        colors = VibraButtons.secondary(),
+                        modifier = Modifier.fillMaxWidth(),
+                        icon = {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_diagnostics),
+                                contentDescription = null,
+                                modifier = Modifier.size(22.dp),
+                            )
+                        },
+                        label = { Text(stringResource(R.string.diag_title), fontWeight = FontWeight.Bold) },
                     )
                 }
             }
