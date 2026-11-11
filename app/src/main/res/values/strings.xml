@@ -11,6 +11,7 @@
 
     <!-- Conexión -->
     <string name="status_connected">Conectado</string>
+    <string name="status_connected_to">Conectado a %1$s</string>
     <string name="status_disconnected">Desconectado</string>
     <string name="status_searching">Emparejando…</string>
     <string name="status_unavailable">Data Layer no disponible</string>

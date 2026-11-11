@@ -11,6 +11,7 @@
 
     <!-- Connection -->
     <string name="status_connected">Connected</string>
+    <string name="status_connected_to">Connected to %1$s</string>
     <string name="status_disconnected">Disconnected</string>
     <string name="status_searching">Pairing…</string>
     <string name="status_unavailable">Data Layer unavailable</string>

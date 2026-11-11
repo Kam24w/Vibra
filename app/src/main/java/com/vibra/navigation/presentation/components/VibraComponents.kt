@@ -214,7 +214,11 @@ fun StatusDot(color: Color, modifier: Modifier = Modifier, size: Dp = 8.dp) {
 @Composable
 fun ConnectionIndicator(connection: ConnectionStatus, modifier: Modifier = Modifier) {
     val label = when (connection) {
-        is ConnectionStatus.Connected -> stringResource(R.string.status_connected)
+        // Con el nombre del celular: ayuda a confirmar que es el emparejado correcto.
+        is ConnectionStatus.Connected ->
+            connection.nodeName.takeIf { it.isNotBlank() }
+                ?.let { stringResource(R.string.status_connected_to, it) }
+                ?: stringResource(R.string.status_connected)
         ConnectionStatus.Unknown -> stringResource(R.string.status_searching)
         ConnectionStatus.Disconnected -> stringResource(R.string.status_disconnected)
         is ConnectionStatus.Unavailable -> stringResource(R.string.status_unavailable)
