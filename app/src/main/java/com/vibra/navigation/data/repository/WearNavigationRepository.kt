@@ -187,23 +187,26 @@ class WearNavigationRepository(
         }
     }
 
+    /** Un único envío al nodo de WanderAI (o al puente de depuración), sin reintentos. */
+    private suspend fun sendOnce(action: UserActionType): Result<Unit> = runCatchingWear {
+        val node = resolveTargetNode()
+        val bridge = devBridge?.takeIf { it.connected.value }
+        if (node == null && bridge == null) throw IllegalStateException("WanderAI no está conectado")
+        val payload = parser.encode(UserAction(action, clock()))
+        withTimeout(SEND_TIMEOUT_MS) {
+            if (node != null) {
+                messageClient.sendMessage(node.id, DataLayerContract.PATH_USER_ACTION, payload).await()
+            } else {
+                check(bridge!!.send(DataLayerContract.PATH_USER_ACTION, payload)) { "Puente local sin conexión" }
+            }
+        }
+        markSynced()
+    }
+
     private suspend fun sendWithRetry(action: UserActionType): Result<Unit> {
         var last: Result<Unit> = Result.failure(IllegalStateException("Sin intentos"))
         for (attempt in 0 until MAX_SEND_ATTEMPTS) {
-            last = runCatchingWear {
-                val node = resolveTargetNode()
-                val bridge = devBridge?.takeIf { it.connected.value }
-                if (node == null && bridge == null) throw IllegalStateException("WanderAI no está conectado")
-                val payload = parser.encode(UserAction(action, clock()))
-                withTimeout(SEND_TIMEOUT_MS) {
-                    if (node != null) {
-                        messageClient.sendMessage(node.id, DataLayerContract.PATH_USER_ACTION, payload).await()
-                    } else {
-                        check(bridge!!.send(DataLayerContract.PATH_USER_ACTION, payload)) { "Puente local sin conexión" }
-                    }
-                }
-                markSynced()
-            }
+            last = sendOnce(action)
             if (last.isSuccess) return last
             if (attempt < MAX_SEND_ATTEMPTS - 1) delay(RETRY_BASE_DELAY_MS shl attempt)
         }
