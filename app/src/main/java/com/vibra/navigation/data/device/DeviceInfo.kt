@@ -18,11 +18,16 @@ data class DeviceInfo(
     val displayName: String get() = "${manufacturer.replaceFirstChar { it.uppercase() }} $model"
 }
 
+/** Origen de [DeviceInfo]; en tests se sustituye por un valor fijo. */
+fun interface DeviceInfoSource {
+    fun read(): DeviceInfo
+}
+
 /** Lee [DeviceInfo] del sistema; la lectura es barata y no requiere permisos peligrosos. */
-class DeviceInfoReader(context: Context) {
+class DeviceInfoReader(context: Context) : DeviceInfoSource {
     private val appContext = context.applicationContext
 
-    fun read(): DeviceInfo = DeviceInfo(
+    override fun read(): DeviceInfo = DeviceInfo(
         manufacturer = Build.MANUFACTURER.orEmpty(),
         model = Build.MODEL.orEmpty(),
         androidVersion = Build.VERSION.RELEASE.orEmpty(),
