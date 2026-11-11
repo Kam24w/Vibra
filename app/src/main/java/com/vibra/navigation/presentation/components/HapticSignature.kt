@@ -9,6 +9,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -49,8 +52,15 @@ fun HapticSignature(
     modifier: Modifier = Modifier,
     width: Dp = 84.dp,
     height: Dp = 16.dp,
+    /** Para lectores de pantalla (p. ej. "Doble pulso"); null si el texto ya está al lado. */
+    description: String? = null,
 ) {
-    Canvas(modifier.width(width).height(height)) {
+    val semanticsModifier = if (description != null) {
+        Modifier.semantics { contentDescription = description }
+    } else {
+        Modifier.clearAndSetSemantics { }
+    }
+    Canvas(modifier.then(semanticsModifier).width(width).height(height)) {
         val total = waveform.totalDurationMs.coerceAtLeast(1L).toFloat()
         val radius = CornerRadius(2.dp.toPx())
         var t = 0L
