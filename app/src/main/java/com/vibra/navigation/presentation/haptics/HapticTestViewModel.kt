@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vibra.navigation.data.settings.HapticSettingsRepository
 import com.vibra.navigation.haptics.HapticPreset
-import com.vibra.navigation.haptics.VibrationManager
+import com.vibra.navigation.haptics.HapticPlayer
 import com.vibra.navigation.presentation.components.containerViewModelFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -27,7 +27,7 @@ private data class Playback(val preset: HapticPreset? = null, val count: Int = 0
 /** Compartido por el test háptico (pantalla 4) y el ajuste de intensidad (pantalla 5). */
 class HapticTestViewModel(
     private val settings: HapticSettingsRepository,
-    private val vibrationManager: VibrationManager,
+    private val vibrationManager: HapticPlayer,
 ) : ViewModel() {
 
     private val playback = MutableStateFlow(Playback())

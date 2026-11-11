@@ -9,7 +9,7 @@ import com.vibra.navigation.data.model.transport
 import com.vibra.navigation.data.repository.NavigationRepository
 import com.vibra.navigation.data.settings.HapticSettingsRepository
 import com.vibra.navigation.haptics.HapticWaveform
-import com.vibra.navigation.haptics.VibrationManager
+import com.vibra.navigation.haptics.HapticPlayer
 import com.vibra.navigation.presentation.components.containerViewModelFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 class DiagnosticsViewModel(
     private val repository: NavigationRepository,
     private val settings: HapticSettingsRepository,
-    private val vibrationManager: VibrationManager,
+    private val vibrationManager: HapticPlayer,
     private val deviceInfoReader: DeviceInfoReader,
 ) : ViewModel() {
 

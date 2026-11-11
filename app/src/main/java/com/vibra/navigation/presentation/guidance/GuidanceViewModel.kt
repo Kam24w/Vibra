@@ -10,7 +10,7 @@ import com.vibra.navigation.data.model.NavigationAction
 import com.vibra.navigation.data.model.NavigationEvent
 import com.vibra.navigation.data.model.UserActionType
 import com.vibra.navigation.data.repository.NavigationRepository
-import com.vibra.navigation.haptics.VibrationManager
+import com.vibra.navigation.haptics.HapticPlayer
 import com.vibra.navigation.presentation.components.containerViewModelFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -76,7 +76,7 @@ private data class LocalState(val isSending: Boolean = false, @param:StringRes v
 
 class GuidanceViewModel(
     private val repository: NavigationRepository,
-    private val vibrationManager: VibrationManager,
+    private val vibrationManager: HapticPlayer,
 ) : ViewModel() {
 
     private val localState = MutableStateFlow(LocalState())

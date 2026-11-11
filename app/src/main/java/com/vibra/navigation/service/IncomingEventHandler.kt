@@ -7,7 +7,7 @@ import com.vibra.navigation.data.parser.NavigationEventParser
 import com.vibra.navigation.data.parser.ParseResult
 import com.vibra.navigation.data.repository.EventDisposition
 import com.vibra.navigation.data.repository.NavigationRepository
-import com.vibra.navigation.haptics.VibrationManager
+import com.vibra.navigation.haptics.HapticPlayer
 
 /**
  * Procesa lo que llega del teléfono, venga por la Data Layer ([VibraListenerService])
@@ -17,7 +17,7 @@ import com.vibra.navigation.haptics.VibrationManager
 class IncomingEventHandler(
     private val parser: NavigationEventParser,
     private val repository: () -> NavigationRepository,
-    private val vibrationManager: () -> VibrationManager,
+    private val vibrationManager: () -> HapticPlayer,
 ) {
     fun onNavigationEventPayload(payload: ByteArray) {
         when (val result = parser.parse(payload)) {
