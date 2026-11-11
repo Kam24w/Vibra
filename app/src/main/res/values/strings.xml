@@ -119,4 +119,13 @@
     <string name="diag_issue_via_cloud">Enlazado por Wi-Fi: acerca el celular para usar Bluetooth</string>
     <string name="diag_issue_intensity_off">Intensidad al 0 %: solo vibrarán las alertas</string>
     <string name="diag_issue_ping_failed">El último intento de enlace falló</string>
+
+    <!-- Actividad en curso (ruta activa en la esfera) -->
+    <string name="ongoing_channel">Ruta activa</string>
+    <string name="ongoing_channel_description">Muestra la ruta en la esfera mientras Vibra te guía</string>
+    <string name="ongoing_title">Ruta activa</string>
+    <string name="ongoing_title_to">Hacia %1$s</string>
+    <string name="ongoing_remaining">Faltan %1$s</string>
+    <string name="ongoing_paused">Guía en pausa</string>
+    <string name="ongoing_open">Abrir guía</string>
 </resources>
