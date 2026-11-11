@@ -73,6 +73,14 @@ Si aparece "Enlazado por Wi-Fi", acerca el celular o enciende su Bluetooth.
 4. Apaga y enciende el Bluetooth del celular unos segundos: el reloj vuelve a enlazarse y,
    si se perdió un aviso hace menos de 60 s, lo recibe al reconectar.
 
+## 6. Accesos rápidos durante la ruta
+
+- **Actividad en curso:** con una ruta activa, Vibra aparece en la esfera del reloj
+  ("Hacia <destino> · Faltan 820 m"). Tocarla abre directamente la guía.
+- **Tile:** desliza desde la esfera hasta el Tile de Vibra (añádelo con una pulsación
+  larga en la esfera → *Añadir Tile*). Muestra la ruta o invita a iniciar una, y su
+  botón abre la guía o la app.
+
 ## Si algo falla
 
 | Síntoma | Causa probable |
