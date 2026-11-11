@@ -1,6 +1,7 @@
 package com.vibra.navigation.presentation.app
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.wear.compose.foundation.CurvedTextStyle
@@ -35,9 +36,15 @@ object VibraDestinations {
  * de Wear OS); AppScaffold mantiene el TimeText común a todas las pantallas.
  */
 @Composable
-fun VibraApp() {
+fun VibraApp(startInGuidance: Boolean = false, guidanceRequests: Int = 0) {
     VibraTheme {
         val navController = rememberSwipeDismissableNavController()
+        // Actividad en curso o Tile: ir a la guía (con el inicio debajo para volver).
+        LaunchedEffect(guidanceRequests) {
+            if (guidanceRequests > 0) {
+                navController.navigate(VibraDestinations.GUIDANCE) { launchSingleTop = true }
+            }
+        }
         AppScaffold(
             timeText = {
                 // Hora en marino sobre el marfil, sin banda de fondo.
@@ -51,7 +58,7 @@ fun VibraApp() {
         ) {
             SwipeDismissableNavHost(
                 navController = navController,
-                startDestination = VibraDestinations.SPLASH,
+                startDestination = if (startInGuidance) VibraDestinations.HOME else VibraDestinations.SPLASH,
             ) {
                 composable(VibraDestinations.SPLASH) {
                     SplashScreen(

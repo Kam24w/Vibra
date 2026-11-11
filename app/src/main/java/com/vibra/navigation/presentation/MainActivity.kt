@@ -2,9 +2,12 @@ package com.vibra.navigation.presentation
 
 import android.content.pm.PackageManager
 import android.os.Build
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.vibra.navigation.data.wear.DevEnvironment
 import com.vibra.navigation.presentation.app.VibraApp
@@ -15,12 +18,29 @@ import com.vibra.navigation.presentation.app.VibraApp
  * la pantalla apagada o la app cerrada.
  */
 class MainActivity : ComponentActivity() {
+    /** Cuenta las veces que se pidió abrir la guía (actividad en curso, Tile...). */
+    private val guidanceRequests = mutableIntStateOf(0)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
-        setContent { VibraApp() }
+        val startInGuidance = savedInstanceState == null && intent.wantsGuidance()
+        if (startInGuidance) guidanceRequests.intValue++
+        setContent {
+            VibraApp(
+                startInGuidance = startInGuidance,
+                guidanceRequests = guidanceRequests.intValue,
+            )
+        }
         requestLocalNetworkForDevBridge()
     }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        if (intent.wantsGuidance()) guidanceRequests.intValue++
+    }
+
+    private fun Intent.wantsGuidance() = getBooleanExtra(EXTRA_OPEN_GUIDANCE, false)
 
     /**
      * Solo debug + emulador: desde Android 17 el socket del puente a 10.0.2.2 necesita
@@ -33,7 +53,14 @@ class MainActivity : ComponentActivity() {
         requestPermissions(arrayOf(PERMISSION_LOCAL_NETWORK), 0)
     }
 
-    private companion object {
-        const val PERMISSION_LOCAL_NETWORK = "android.permission.ACCESS_LOCAL_NETWORK"
+    companion object {
+        private const val PERMISSION_LOCAL_NETWORK = "android.permission.ACCESS_LOCAL_NETWORK"
+        private const val EXTRA_OPEN_GUIDANCE = "com.vibra.navigation.OPEN_GUIDANCE"
+
+        /** Abre Vibra directamente en la guía, saltando la presentación. */
+        fun openGuidanceIntent(context: Context): Intent =
+            Intent(context, MainActivity::class.java)
+                .putExtra(EXTRA_OPEN_GUIDANCE, true)
+                .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
     }
 }
