@@ -10,5 +10,6 @@ class VibraApplication : Application() {
         super.onCreate()
         // También cuando el sistema despierta el proceso solo para un mensaje de WanderAI.
         container.ongoingGuidance.start(container.applicationScope)
+        container.tileRefresher.start(container.applicationScope)
     }
 }

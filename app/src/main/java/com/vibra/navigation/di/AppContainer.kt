@@ -6,6 +6,9 @@ import com.vibra.navigation.data.device.BatteryMonitor
 import com.vibra.navigation.data.device.DeviceInfoReader
 import com.vibra.navigation.ongoing.OngoingGuidanceController
 import com.vibra.navigation.ongoing.OngoingGuidanceNotifier
+import com.vibra.navigation.tile.TileRefresher
+import com.vibra.navigation.tile.VibraTileService
+import androidx.wear.tiles.TileService
 import com.vibra.navigation.data.parser.NavigationEventParser
 import com.vibra.navigation.data.repository.NavigationRepository
 import com.vibra.navigation.data.repository.WearNavigationRepository
@@ -79,5 +82,12 @@ class AppContainer(context: Context) {
     val ongoingGuidance: OngoingGuidanceController by lazy {
         val notifier = OngoingGuidanceNotifier(appContext)
         OngoingGuidanceController(navigationRepository, show = notifier::show, cancel = notifier::cancel)
+    }
+
+    /** Redibuja el Tile cuando cambia la ruta o el enlace; arrancado por VibraApplication. */
+    val tileRefresher: TileRefresher by lazy {
+        TileRefresher(navigationRepository) {
+            TileService.getUpdater(appContext).requestUpdate(VibraTileService::class.java)
+        }
     }
 }
