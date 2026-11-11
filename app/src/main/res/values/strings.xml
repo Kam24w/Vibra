@@ -128,4 +128,14 @@
     <string name="ongoing_remaining">Faltan %1$s</string>
     <string name="ongoing_paused">Guía en pausa</string>
     <string name="ongoing_open">Abrir guía</string>
+
+    <!-- Tile -->
+    <string name="tile_label">Vibra</string>
+    <string name="tile_description">Estado de la ruta y acceso rápido a la guía háptica</string>
+    <string name="tile_no_route">Sin ruta activa</string>
+    <string name="tile_start_hint">Inicia una ruta en WanderAI</string>
+    <string name="tile_phone_linked">Celular enlazado</string>
+    <string name="tile_phone_missing">Sin celular</string>
+    <string name="tile_open_guidance">Abrir guía</string>
+    <string name="tile_open_app">Abrir Vibra</string>
 </resources>
