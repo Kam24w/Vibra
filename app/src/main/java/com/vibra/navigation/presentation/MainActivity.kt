@@ -59,7 +59,8 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         private const val PERMISSION_LOCAL_NETWORK = "android.permission.ACCESS_LOCAL_NETWORK"
-        private const val EXTRA_OPEN_GUIDANCE = "com.vibra.navigation.OPEN_GUIDANCE"
+        /** Extra booleano: abrir directamente la guía (actividad en curso, Tile). */
+        const val EXTRA_OPEN_GUIDANCE = "com.vibra.navigation.OPEN_GUIDANCE"
 
         /** Abre Vibra directamente en la guía, saltando la presentación. */
         fun openGuidanceIntent(context: Context): Intent =
