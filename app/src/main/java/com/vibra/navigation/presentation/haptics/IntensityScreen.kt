@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -66,7 +67,13 @@ fun IntensityScreen(state: HapticTestUiState, onChange: (Int) -> Unit, onTry: ()
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 item(key = "title") {
-                    Text(title, color = VibraColors.OnSurfaceMuted, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        title,
+                        color = VibraColors.OnSurfaceMuted,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.semantics { heading() },
+                    )
                 }
                 item(key = "value") {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
