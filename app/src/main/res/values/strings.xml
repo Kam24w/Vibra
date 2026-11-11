@@ -86,4 +86,37 @@
     <string name="maneuver_rerouting">recalculando ruta</string>
     <string name="maneuver_alert">alerta, revisa el teléfono</string>
     <string name="maneuver_unknown">indicación</string>
+
+    <!-- Diagnóstico -->
+    <string name="diag_title">Diagnóstico</string>
+    <string name="diag_ready">Listo para la prueba</string>
+    <string name="diag_not_ready">Revisa antes de probar</string>
+    <string name="diag_link">Enlace</string>
+    <string name="diag_transport_bluetooth">Bluetooth</string>
+    <string name="diag_transport_cloud">Wi-Fi / nube</string>
+    <string name="diag_transport_bridge">Túnel ADB</string>
+    <string name="diag_transport_none">Sin teléfono</string>
+    <string name="diag_transport_unavailable">Sin Wear OS</string>
+    <string name="diag_phone">Teléfono</string>
+    <string name="diag_last_message">Último mensaje</string>
+    <string name="diag_motor">Motor</string>
+    <string name="diag_motor_amplitude">Con control de fuerza</string>
+    <string name="diag_motor_on_off">Solo encendido/apagado</string>
+    <string name="diag_motor_none">Sin vibrador</string>
+    <string name="diag_watch">Reloj</string>
+    <string name="diag_android">Android %1$s (API %2$d)</string>
+    <string name="diag_app">Vibra %1$s</string>
+    <string name="diag_ping">Probar enlace</string>
+    <string name="diag_ping_idle">Mide la respuesta del teléfono</string>
+    <string name="diag_ping_running">Probando…</string>
+    <string name="diag_ping_ok">Respondió en %1$d ms</string>
+    <string name="diag_ping_failed">El teléfono no respondió</string>
+    <string name="diag_vibrate">Vibrar al máximo</string>
+    <string name="diag_issue_api">Este reloj no tiene Wear OS con Google Play Services</string>
+    <string name="diag_issue_no_phone">Abre WanderAI en el celular emparejado</string>
+    <string name="diag_issue_no_vibrator">Este reloj no tiene motor de vibración</string>
+    <string name="diag_issue_bluetooth_off">Enciende el Bluetooth del reloj</string>
+    <string name="diag_issue_via_cloud">Enlazado por Wi-Fi: acerca el celular para usar Bluetooth</string>
+    <string name="diag_issue_intensity_off">Intensidad al 0 %: solo vibrarán las alertas</string>
+    <string name="diag_issue_ping_failed">El último intento de enlace falló</string>
 </resources>
