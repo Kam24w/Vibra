@@ -1,5 +1,6 @@
 package com.vibra.navigation.presentation.components
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
@@ -13,6 +14,14 @@ fun formatDistance(meters: Double): String =
         stringResource(R.string.distance_meters, meters.toInt())
     } else {
         stringResource(R.string.distance_km, meters / 1_000)
+    }
+
+/** Versión sin Compose de [formatDistance], para notificaciones y servicios. */
+fun formatDistanceText(context: Context, meters: Double): String =
+    if (meters < 1_000) {
+        context.getString(R.string.distance_meters, meters.toInt())
+    } else {
+        context.getString(R.string.distance_km, meters / 1_000)
     }
 
 /** Reloj que se actualiza cada segundo mientras el composable está visible. */
