@@ -87,6 +87,7 @@ dependencies {
     implementation(libs.compose.ui.tooling)
     implementation(libs.core.splashscreen)
     implementation(libs.wear.ongoing)
+    implementation(libs.androidx.wear)
     implementation(libs.wear.tiles)
     implementation(libs.wear.protolayout)
     implementation(libs.guava.android)
