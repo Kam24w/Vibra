@@ -4,6 +4,8 @@ import android.content.Context
 import com.google.android.gms.wearable.Wearable
 import com.vibra.navigation.data.device.BatteryMonitor
 import com.vibra.navigation.data.device.DeviceInfoReader
+import com.vibra.navigation.ongoing.OngoingGuidanceController
+import com.vibra.navigation.ongoing.OngoingGuidanceNotifier
 import com.vibra.navigation.data.parser.NavigationEventParser
 import com.vibra.navigation.data.repository.NavigationRepository
 import com.vibra.navigation.data.repository.WearNavigationRepository
@@ -72,4 +74,10 @@ class AppContainer(context: Context) {
     val batteryMonitor: BatteryMonitor by lazy { BatteryMonitor(appContext) }
 
     val deviceInfoReader: DeviceInfoReader by lazy { DeviceInfoReader(appContext) }
+
+    /** Ruta activa en la esfera (Ongoing Activity); arrancado por VibraApplication. */
+    val ongoingGuidance: OngoingGuidanceController by lazy {
+        val notifier = OngoingGuidanceNotifier(appContext)
+        OngoingGuidanceController(navigationRepository, show = notifier::show, cancel = notifier::cancel)
+    }
 }
