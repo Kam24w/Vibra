@@ -27,14 +27,19 @@ class HapticSettingsRepository(context: Context) : HapticSettings {
         prefs.edit { putInt(KEY_PERCENT, clamped) }
     }
 
-    /** Migra el antiguo nivel 1–5 (20 % por nivel) si aún no hay porcentaje guardado. */
-    private fun readInitialPercent(): Int = when {
-        prefs.contains(KEY_PERCENT) -> prefs.getInt(KEY_PERCENT, DEFAULT_PERCENT)
-        prefs.contains(LEGACY_KEY_LEVEL) -> prefs.getInt(LEGACY_KEY_LEVEL, 5) * 20
-        else -> DEFAULT_PERCENT
-    }.coerceIn(MIN_PERCENT, MAX_PERCENT)
+    private fun readInitialPercent(): Int = initialIntensityPercent(
+        savedPercent = if (prefs.contains(KEY_PERCENT)) prefs.getInt(KEY_PERCENT, DEFAULT_PERCENT) else null,
+        legacyLevel = if (prefs.contains(LEGACY_KEY_LEVEL)) prefs.getInt(LEGACY_KEY_LEVEL, 5) else null,
+    )
 
     companion object {
+        /**
+         * Intensidad inicial: el porcentaje guardado; si no hay, migra el antiguo nivel
+         * 1–5 (20 % por nivel); si tampoco, 100 %. Siempre dentro de 0..100.
+         */
+        fun initialIntensityPercent(savedPercent: Int?, legacyLevel: Int?): Int =
+            (savedPercent ?: legacyLevel?.times(20) ?: DEFAULT_PERCENT).coerceIn(MIN_PERCENT, MAX_PERCENT)
+
         const val MIN_PERCENT = 0
         const val MAX_PERCENT = 100
         const val STEP_PERCENT = 10
