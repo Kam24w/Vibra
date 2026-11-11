@@ -8,8 +8,12 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.wear.ambient.AmbientLifecycleObserver
+import com.vibra.navigation.presentation.ambient.LocalAmbientMode
 import com.vibra.navigation.data.wear.DevEnvironment
 import com.vibra.navigation.presentation.app.VibraApp
 
@@ -22,16 +26,34 @@ class MainActivity : ComponentActivity() {
     /** Cuenta las veces que se pidió abrir la guía (actividad en curso, Tile...). */
     private val guidanceRequests = mutableIntStateOf(0)
 
+    /** Modo ambiente: con una ruta, la guía sigue visible (en bajo consumo) al bajar la muñeca. */
+    private val ambient = mutableStateOf(false)
+    private val ambientObserver = AmbientLifecycleObserver(
+        this,
+        object : AmbientLifecycleObserver.AmbientLifecycleCallback {
+            override fun onEnterAmbient(ambientDetails: AmbientLifecycleObserver.AmbientDetails) {
+                ambient.value = true
+            }
+
+            override fun onExitAmbient() {
+                ambient.value = false
+            }
+        },
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         val startInGuidance = savedInstanceState == null && intent.wantsGuidance()
         if (startInGuidance) guidanceRequests.intValue++
+        lifecycle.addObserver(ambientObserver)
         setContent {
-            VibraApp(
-                startInGuidance = startInGuidance,
-                guidanceRequests = guidanceRequests.intValue,
-            )
+            CompositionLocalProvider(LocalAmbientMode provides ambient.value) {
+                VibraApp(
+                    startInGuidance = startInGuidance,
+                    guidanceRequests = guidanceRequests.intValue,
+                )
+            }
         }
         requestRuntimePermissions()
     }
