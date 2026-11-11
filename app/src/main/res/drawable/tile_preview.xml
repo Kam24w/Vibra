@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Vista previa del Tile en el selector de Tiles: círculo marfil con el icono y el botón naranja. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="192dp"
+    android:height="192dp"
+    android:viewportWidth="192"
+    android:viewportHeight="192">
+    <path
+        android:fillColor="#FFF4F1EA"
+        android:pathData="M96,0a96,96 0,1 1,0 192a96,96 0,1 1,0 -192z" />
+    <group
+        android:translateX="81"
+        android:translateY="44"
+        android:scaleX="1.25"
+        android:scaleY="1.25">
+        <path
+            android:fillColor="#FF1B365D"
+            android:pathData="M0,15h2L2,9L0,9v6zM3,17h2L5,7L3,7v10zM22,9v6h2L24,9h-2zM19,17h2L21,7h-2v10zM16.5,3h-9C6.67,3 6,3.67 6,4.5v15c0,0.83 0.67,1.5 1.5,1.5h9c0.83,0 1.5,-0.67 1.5,-1.5v-15c0,-0.83 -0.67,-1.5 -1.5,-1.5zM16,19L8,19L8,5h8v14z" />
+    </group>
+    <path
+        android:fillColor="#FF1B365D"
+        android:pathData="M56,86h80v8h-80z" />
+    <path
+        android:fillColor="#FF5B6B80"
+        android:pathData="M66,100h60v5h-60z" />
+    <path
+        android:fillColor="#FFF7931E"
+        android:pathData="M66,118h60a10,10 0,0 1,0 20h-60a10,10 0,0 1,0 -20z" />
+</vector>
