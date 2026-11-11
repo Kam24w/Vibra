@@ -103,6 +103,8 @@ dependencies {
     androidTestImplementation(libs.ui.test.junit4)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.ext.junit)
+    // Compose UI test trae Espresso 3.5, que falla en Android 17 (InputManager.getInstance).
+    androidTestImplementation(libs.androidx.test.espresso.core)
     debugImplementation(libs.ui.test.manifest)
     debugImplementation(libs.ui.tooling)
 }
