@@ -82,4 +82,52 @@
     <string name="intensity_strong">Strong</string>
     <string name="haptics_no_amplitude">This watch cannot change the strength: only the pattern changes.</string>
     <string name="haptics_no_vibrator">This device has no vibration motor.</string>
+
+    <!-- Diagnostics -->
+    <string name="diag_title">Diagnostics</string>
+    <string name="diag_ready">Ready to test</string>
+    <string name="diag_not_ready">Check before testing</string>
+    <string name="diag_link">Link</string>
+    <string name="diag_transport_cloud">Wi-Fi / cloud</string>
+    <string name="diag_transport_bridge">ADB tunnel</string>
+    <string name="diag_transport_none">No phone</string>
+    <string name="diag_transport_unavailable">No Wear OS</string>
+    <string name="diag_phone">Phone</string>
+    <string name="diag_last_message">Last message</string>
+    <string name="diag_motor">Motor</string>
+    <string name="diag_motor_amplitude">Strength control</string>
+    <string name="diag_motor_on_off">On/off only</string>
+    <string name="diag_motor_none">No vibration motor</string>
+    <string name="diag_watch">Watch</string>
+    <string name="diag_ping">Test link</string>
+    <string name="diag_ping_idle">Tap to measure</string>
+    <string name="diag_ping_running">Testing…</string>
+    <string name="diag_ping_ok">Answered in %1$d ms</string>
+    <string name="diag_ping_failed">The phone did not answer</string>
+    <string name="diag_vibrate">Vibrate at full strength</string>
+    <string name="diag_issue_api">This watch has no Wear OS with Google Play Services</string>
+    <string name="diag_issue_no_phone">Open WanderAI on the paired phone</string>
+    <string name="diag_issue_no_vibrator">This watch has no vibration motor</string>
+    <string name="diag_issue_bluetooth_off">Turn on the watch Bluetooth</string>
+    <string name="diag_issue_via_cloud">Linked over Wi-Fi: bring the phone closer to use Bluetooth</string>
+    <string name="diag_issue_intensity_off">Intensity at 0 %: only alerts will vibrate</string>
+    <string name="diag_issue_ping_failed">The last link test failed</string>
+
+    <!-- Ongoing activity -->
+    <string name="ongoing_channel">Active route</string>
+    <string name="ongoing_channel_description">Shows the route on the watch face while Vibra guides you</string>
+    <string name="ongoing_title">Active route</string>
+    <string name="ongoing_title_to">To %1$s</string>
+    <string name="ongoing_remaining">%1$s to go</string>
+    <string name="ongoing_paused">Guidance paused</string>
+    <string name="ongoing_open">Open guidance</string>
+
+    <!-- Tile -->
+    <string name="tile_description">Route status and quick access to haptic guidance</string>
+    <string name="tile_no_route">No active route</string>
+    <string name="tile_start_hint">Start a route in WanderAI</string>
+    <string name="tile_phone_linked">Phone linked</string>
+    <string name="tile_phone_missing">No phone</string>
+    <string name="tile_open_guidance">Open guidance</string>
+    <string name="tile_open_app">Open Vibra</string>
 </resources>
