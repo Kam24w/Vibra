@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Modo ambiente (pantalla siempre activa) durante la guía. -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <!-- Actividad en curso de la ruta (Wear OS 4+). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Solo para leer si el Bluetooth está encendido (diagnóstico) en Android 11. -->
