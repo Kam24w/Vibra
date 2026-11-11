@@ -76,7 +76,12 @@ sealed interface ConnectionStatus {
      * @param isNearby true si el nodo está enlazado directamente por Bluetooth;
      * false si la Data Layer llega por Wi-Fi/nube.
      */
-    data class Connected(val nodeName: String, val isNearby: Boolean = true) : ConnectionStatus
+    data class Connected(
+        val nodeName: String,
+        val isNearby: Boolean = true,
+        /** True cuando el enlace es el puente ADB de depuración (emulador), no la Data Layer. */
+        val viaDevBridge: Boolean = false,
+    ) : ConnectionStatus
 
     /** La API de Wearable no está disponible (p. ej. falta Google Play Services / emulador sin emparejar). */
     data class Unavailable(val reason: String) : ConnectionStatus

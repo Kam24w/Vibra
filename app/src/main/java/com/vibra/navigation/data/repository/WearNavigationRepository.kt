@@ -244,7 +244,7 @@ class WearNavigationRepository(
         // Emulador sin emparejamiento de Play services: el puente ADB cuenta como conexión.
         viaBridge = result.getOrNull() == null && devBridge?.connected?.value == true
         if (viaBridge) {
-            updateConnection(ConnectionStatus.Connected(LocalDevBridgeClient.NODE_NAME, isNearby = true))
+            updateConnection(ConnectionStatus.Connected(LocalDevBridgeClient.NODE_NAME, isNearby = true, viaDevBridge = true))
             return null
         }
 
