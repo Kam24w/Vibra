@@ -27,23 +27,23 @@ import com.vibra.navigation.data.model.NavigationEvent
 class VibrationManager(
     context: Context,
     private val intensity: () -> Float = { 1f },
-) {
+) : HapticPlayer {
 
     private val vibrator: Vibrator? = resolveVibrator(context.applicationContext)
 
-    val isAvailable: Boolean get() = vibrator?.hasVibrator() == true
+    override val isAvailable: Boolean get() = vibrator?.hasVibrator() == true
 
     /** Sin control de amplitud la intensidad no se puede ajustar (solo on/off). */
-    val hasAmplitudeControl: Boolean get() = vibrator?.hasAmplitudeControl() == true
+    override val hasAmplitudeControl: Boolean get() = vibrator?.hasAmplitudeControl() == true
 
-    fun vibrate(event: NavigationEvent) {
+    override fun vibrate(event: NavigationEvent) {
         vibrate(HapticWaveform.forEvent(event), fullStrength = HapticWaveform.ignoresUserIntensity(event.action))
     }
 
-    fun vibrate(preset: HapticPreset) = vibrate(preset.waveform())
+    override fun vibrate(preset: HapticPreset) = vibrate(preset.waveform())
 
     /** [fullStrength] ignora la intensidad del usuario (alertas). */
-    fun vibrate(waveform: HapticWaveform, fullStrength: Boolean = false) {
+    override fun vibrate(waveform: HapticWaveform, fullStrength: Boolean) {
         val vibrator = vibrator?.takeIf { it.hasVibrator() } ?: run {
             Log.w(TAG, "Dispositivo sin vibrador")
             return
@@ -69,7 +69,7 @@ class VibrationManager(
         }
     }
 
-    fun cancel() {
+    override fun cancel() {
         vibrator?.cancel()
     }
 
