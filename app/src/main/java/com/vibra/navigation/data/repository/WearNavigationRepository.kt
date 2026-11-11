@@ -161,12 +161,16 @@ class WearNavigationRepository(
     }
 
     override fun onActiveRouteChanged(route: ActiveRoute) {
+        applyRoute(route)
+        markSynced()
+    }
+
+    private fun applyRoute(route: ActiveRoute) {
         _activeRoute.value = route
         if (!route.routeActive) {
             _latestEvent.value = null
             _guidancePaused.value = false
         }
-        markSynced()
     }
 
     // ---------------------------------------------------------------------------------
@@ -231,7 +235,9 @@ class WearNavigationRepository(
             try {
                 val item = buffer.firstOrNull()
                 if (item != null) {
-                    onActiveRouteChanged(DataMapItem.fromDataItem(item).dataMap.toActiveRoute())
+                    // Leer la copia local de la Data Layer no prueba que el teléfono esté
+                    // alcanzable: no cuenta como sincronización.
+                    applyRoute(DataMapItem.fromDataItem(item).dataMap.toActiveRoute())
                 }
             } finally {
                 buffer.release()
