@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Actividad en curso de la ruta (Wear OS 4+). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Solo para leer si el Bluetooth está encendido (diagnóstico) en Android 11. -->
     <uses-permission
         android:name="android.permission.BLUETOOTH"
