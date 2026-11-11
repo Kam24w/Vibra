@@ -2,6 +2,12 @@ package com.vibra.navigation.presentation.app
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.vibra.navigation.presentation.ambient.AmbientGuidance
+import com.vibra.navigation.presentation.ambient.LocalAmbientMode
+import com.vibra.navigation.presentation.guidance.GuidanceViewModel
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.wear.compose.foundation.CurvedTextStyle
@@ -103,6 +109,13 @@ fun VibraApp(startInGuidance: Boolean = false, guidanceRequests: Int = 0) {
                 composable(VibraDestinations.INTENSITY) { IntensityRoute() }
                 composable(VibraDestinations.DIAGNOSTICS) { DiagnosticsRoute() }
             }
+        }
+        // Encima de todo: al atenuarse la pantalla se ve la guía en bajo consumo, sin
+        // perder la pantalla en la que estaba el usuario al volver.
+        if (LocalAmbientMode.current) {
+            val guidance: GuidanceViewModel = viewModel(factory = GuidanceViewModel.Factory)
+            val state by guidance.uiState.collectAsStateWithLifecycle()
+            AmbientGuidance(state)
         }
     }
 }
