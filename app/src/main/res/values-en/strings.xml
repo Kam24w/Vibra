@@ -59,4 +59,27 @@
     <string name="maneuver_rerouting">rerouting</string>
     <string name="maneuver_alert">alert, check your phone</string>
     <string name="maneuver_unknown">direction</string>
+
+    <!-- Haptic test -->
+    <string name="haptics_title">Haptic test</string>
+    <string name="haptics_left">Left</string>
+    <string name="haptics_left_hint">Steady pulse</string>
+    <string name="haptics_right">Right</string>
+    <string name="haptics_right_hint">Double pulse</string>
+    <string name="haptics_straight">Straight</string>
+    <string name="haptics_straight_hint">Speeding triple</string>
+    <string name="haptics_u_turn">Turn back</string>
+    <string name="haptics_u_turn_hint">Blinking alert</string>
+    <string name="haptics_quick_test">Test vibration</string>
+    <string name="haptics_patterns">Patterns</string>
+    <string name="pattern_pulse">Pulse</string>
+    <string name="pattern_wave">Wave</string>
+    <string name="pattern_rhythm">Rhythm</string>
+    <string name="haptics_intensity">Intensity</string>
+    <string name="intensity_off">Vibration off</string>
+    <string name="intensity_soft">Soft</string>
+    <string name="intensity_medium">Medium</string>
+    <string name="intensity_strong">Strong</string>
+    <string name="haptics_no_amplitude">This watch cannot change the strength: only the pattern changes.</string>
+    <string name="haptics_no_vibrator">This device has no vibration motor.</string>
 </resources>
