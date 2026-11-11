@@ -187,6 +187,12 @@ class WearNavigationRepository(
         }
     }
 
+    override suspend fun pingPhone(): Result<Long> {
+        val start = clock()
+        // ACKNOWLEDGE no cambia el estado de la guía: WanderAI solo anota la confirmación.
+        return sendMutex.withLock { sendOnce(UserActionType.ACKNOWLEDGE) }.map { clock() - start }
+    }
+
     /** Un único envío al nodo de WanderAI (o al puente de depuración), sin reintentos. */
     private suspend fun sendOnce(action: UserActionType): Result<Unit> = runCatchingWear {
         val node = resolveTargetNode()

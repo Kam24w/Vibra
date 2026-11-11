@@ -46,6 +46,9 @@ interface NavigationRepository {
 
     fun setGuidancePaused(paused: Boolean)
 
+    /** Envía un mensaje inocuo a WanderAI y devuelve cuántos ms tardó en entregarse. */
+    suspend fun pingPhone(): Result<Long>
+
     // --- Entrada desde el WearableListenerService ---
     fun onNavigationEvent(event: NavigationEvent): EventDisposition
     fun onActiveRouteChanged(route: ActiveRoute)
